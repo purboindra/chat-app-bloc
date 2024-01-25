@@ -16,4 +16,4 @@ build/
 coverage/
 
 .env
-lib/src/env/*
+lib/src/env/**
