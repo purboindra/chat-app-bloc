@@ -18,12 +18,9 @@ Future<Response> _signUp(RequestContext context) async {
   try {
     final email = body["email"] as String?;
     final password = body["password"] as String?;
-
-    print("EMAILL: $email PASSWORDD $password");
     if (email != null && password != null) {
       final response =
           await authRepository.signUp(email: email, password: password);
-      print("RESPP ${response}");
       if (response!["message"] != null) {
         return Response.json(
           body: {
@@ -35,7 +32,7 @@ Future<Response> _signUp(RequestContext context) async {
       }
       return Response.json(body: {
         "data": response["data"],
-        "message": "Success Add User",
+        "message": "Register Successfully!",
       }, statusCode: HttpStatus.ok);
     }
     return Response(statusCode: HttpStatus.badRequest);

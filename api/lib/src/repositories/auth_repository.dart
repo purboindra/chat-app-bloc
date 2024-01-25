@@ -23,35 +23,31 @@ class AuthRepository {
   Future<Map<String, dynamic>?> signUp(
       {required String email, required String password}) async {
     try {
-      final response =
-          await dbClient.auth.signUp(password: password, email: email);
-      print("EMAIL: $email PASSWORD: $password");
+      final response = await dbClient.auth.signUp(
+        password: password,
+        email: email,
+      );
       if (response.user == null) {
         throw Exception("Invalid Credentials");
       }
       final user = UserEntity(
-        avatarUrl: "",
         id: response.user!.id,
         email: response.user!.email,
         password: password,
-        createdAt: DateTime.now().millisecondsSinceEpoch,
+        createdAt: DateTime.now(),
         phoneNumber: response.user!.phone,
-        userName: "",
+        userName: email.split("@")[0],
       );
-      print("USER ${user.toJson()}");
-      await dbClient.from("users").insert({
-        "id": response.user!.id,
-        "email": email,
-        "password": password,
-        "created_at": DateTime.now().toUtc().toIso8601String(),
-        "updated_at": DateTime.now().toUtc().toIso8601String(),
-      });
+      await dbClient
+          .from("users")
+          .update(user.toJson())
+          .eq("id", response.user!.id);
       return {
         "message": null,
         "data": user.toJson(),
       };
-    } catch (e) {
-      print("ERROR SIGN UP $e");
+    } catch (e, st) {
+      print("ERROR SIGN UP $e $st");
       return {
         "message": e.toString(),
         "data": null,
