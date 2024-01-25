@@ -21,8 +21,8 @@ class AuthenticationBloc
       }
       await authRepository.saveId(response.id ?? "");
       emit(SuccessAuthState());
-    } catch (e) {
-      AppPrint.debugPrint("ERROR FROM SIGN IN EVENT $e");
+    } catch (e, st) {
+      AppPrint.debugPrint("ERROR FROM SIGN IN EVENT $e $st");
       emit(ErrorAuthState(e.toString()));
     }
   }
