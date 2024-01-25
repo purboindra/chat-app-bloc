@@ -7,7 +7,7 @@ class UserEntity {
   String? id;
   String? email;
   String? password;
-  int? createdAt;
+  DateTime? createdAt;
   @JsonKey(name: "phone")
   String? phoneNumber;
   @JsonKey(name: "username")
@@ -15,7 +15,7 @@ class UserEntity {
   @JsonKey(name: "avatar_url")
   String? avatarUrl;
   @JsonKey(name: "updated_at")
-  int? updatedAt;
+  DateTime? updatedAt;
   UserEntity({
     this.id,
     this.email,
