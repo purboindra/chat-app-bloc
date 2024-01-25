@@ -55,14 +55,8 @@ class ApiClient {
       throw Exception(
           "${response.statusCode}, error: ${decodeData["message"]}");
     }
-    final user = UserEntity(
-        id: decodeData["id"],
-        avatarUrl: decodeData["avatarUrl"] ?? "",
-        email: email,
-        password: password,
-        phoneNumber: decodeData["phone"] ?? "",
-        createdAt: DateTime.now().millisecondsSinceEpoch,
-        userName: decodeData["username"] ?? "");
+    if (decodeData["data"] == null) return null;
+    final user = UserEntity.fromJson(decodeData["data"]);
     return user;
   }
 
