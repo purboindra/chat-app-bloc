@@ -12,7 +12,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<UserEntity?> signIn(String email, String password) async {
     final response = await apiClient.signIn(email, password);
-    return null;
+    return response;
   }
 
   @override
@@ -22,9 +22,17 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> saveId(String? id) async {
+  Future<void> saveIdToPrefs(String? id) async {
     final prefs = await SharedPreferences.getInstance();
     final userId = await prefs.setString("user_id", id ?? "");
     AppPrint.debugPrint("USER ID $userId $id");
+  }
+
+  @override
+  Future<String?> getIdFromPrefs(String? id) async {
+    final prefs = await SharedPreferences.getInstance();
+    final user = prefs.getString("user_id");
+    if (user != null) return user;
+    return null;
   }
 }

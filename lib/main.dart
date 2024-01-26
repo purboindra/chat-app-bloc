@@ -3,6 +3,7 @@ import 'package:chat_app/data/repositories/home_repository.dart';
 import 'package:chat_app/di/dependency_injection.dart';
 import 'package:chat_app/di/inject.dart';
 import 'package:chat_app/domain/bloc/auth_bloc.dart';
+import 'package:chat_app/domain/event/auth_event.dart';
 import 'package:chat_app/route/router.dart';
 import 'package:chat_app/services/web_socket_client.dart';
 import 'package:flutter/material.dart';
@@ -33,7 +34,8 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) => AuthenticationBloc(inject()),
+          create: (_) =>
+              AuthenticationBloc(inject())..add(GetUserFromPrefsEvent()),
         ),
       ],
       child: MaterialApp.router(

@@ -17,6 +17,16 @@ final class SignUpEvent extends AuthenticationEvent {
   List<Object> get props => [email, password];
 }
 
+final class SignInEvent extends AuthenticationEvent {
+  final String email;
+  final String password;
+
+  const SignInEvent(this.email, this.password);
+
+  @override
+  List<Object> get props => [email, password];
+}
+
 final class SaveId extends AuthenticationEvent {
   final String? id;
 
@@ -25,3 +35,5 @@ final class SaveId extends AuthenticationEvent {
   @override
   List<Object> get props => [];
 }
+
+final class GetUserFromPrefsEvent extends AuthenticationEvent {}

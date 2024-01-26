@@ -19,13 +19,31 @@ Future<Response> _signIn(RequestContext context) async {
     final email = body["email"] as String?;
     final password = body["password"] as String?;
     if (email != null && password != null) {
-      await authRepository.singIn(email: email, password: password);
-      return Response.json(statusCode: HttpStatus.ok);
+      final response =
+          await authRepository.singIn(email: email, password: password);
+      if (response["data"] == null) {
+        return Response.json(body: {
+          "data": null,
+          "status_code": HttpStatus.badRequest,
+          "message": response["message"],
+        });
+      }
+      return Response.json(
+        body: {
+          "data": response["data"],
+          "message": response["message"],
+          "status_code": HttpStatus.ok,
+        },
+      );
     }
     return Response.json(statusCode: HttpStatus.badRequest);
   } catch (e, st) {
     print("ERROR FROM SIGN IN $e $st");
     return Response.json(
+      body: {
+        "message": "Sorry, something went wrong!",
+        "data": null,
+      },
       statusCode: HttpStatus.internalServerError,
     );
   }

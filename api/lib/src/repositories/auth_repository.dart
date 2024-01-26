@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:api/src/entities/user_entity.dart';
 import 'package:supabase/supabase.dart';
 
@@ -55,12 +57,34 @@ class AuthRepository {
     }
   }
 
-  Future<void> singIn({required String email, required String password}) async {
+  Future<Map<String, dynamic>> singIn(
+      {required String email, required String password}) async {
     try {
-      await dbClient.auth.signInWithPassword(password: password, email: email);
+      final response = await dbClient.auth
+          .signInWithPassword(password: password, email: email);
+      if (response.session == null) {
+        return {
+          "data": null,
+          "message": "Invalid Credentials",
+          "status_code": HttpStatus.badRequest
+        };
+      }
+      final userData = await dbClient
+          .from("users")
+          .select()
+          .eq("id", response.session!.user.id);
+      return {
+        "data": userData[0],
+        "message": "Successfully Sign In",
+        "status_code": HttpStatus.ok,
+      };
     } catch (e) {
       print("ERROR SIGN IN $e");
-      return null;
+      return {
+        "data": null,
+        "message": "Sorry, Something Went Wrong",
+        "status_code": HttpStatus.internalServerError,
+      };
     }
   }
 }

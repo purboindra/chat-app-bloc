@@ -21,3 +21,14 @@ final class ErrorAuthState extends AuthenticationState {
   @override
   List<Object> get props => [message];
 }
+
+final class ResultGetUserFromPrefsState extends AuthenticationState {
+  final String id;
+
+  const ResultGetUserFromPrefsState(this.id);
+
+  @override
+  List<Object> get props => [id];
+}
+
+final class LoadingGetUserFromPrefsState extends AuthenticationState {}

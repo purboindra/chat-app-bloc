@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:chat_app/data/entities/user_entity.dart';
@@ -60,17 +61,20 @@ class ApiClient {
     return user;
   }
 
-  Future<Map<String, dynamic>> signIn(String email, String password) async {
+  Future<UserEntity?> signIn(String email, String password) async {
     final uri = Uri.parse('$_baseUrl/auth/sign-in');
-    final response = await _handleRequest((headers) => _httpClient.post(
-          uri,
-          headers: headers,
-          body: jsonEncode({
-            "email": email,
-            "password": password,
-          }),
-        ));
-    return response;
+    final response = await http.post(uri,
+        body: jsonEncode({"email": email, "password": password}));
+    final decodeData = jsonDecode(response.body);
+    log("SIG IN $decodeData");
+    if (response.statusCode != HttpStatus.ok) {
+      throw Exception(
+          "${response.statusCode}, error: ${decodeData["message"]}");
+    }
+    if (decodeData["data"] == null) return null;
+    final user = UserEntity.fromJson(decodeData["data"]);
+    log("USER ${user.email}");
+    return user;
   }
 
   Future<Map<String, dynamic>> _handleRequest(
