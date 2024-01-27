@@ -1,5 +1,7 @@
 import 'package:chat_app/domain/bloc/auth_bloc.dart';
+import 'package:chat_app/domain/bloc/message_bloc.dart';
 import 'package:chat_app/domain/event/auth_event.dart';
+import 'package:chat_app/domain/event/message_event.dart';
 import 'package:chat_app/domain/state/auth_state.dart';
 import 'package:chat_app/route/route_name.dart';
 import 'package:chat_app/utils/app_snackbar.dart';
@@ -21,21 +23,8 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
   final passwordC = TextEditingController();
 
   bool _changeSignInScreen = false;
-  final bool _isLoading = false;
 
   final _formKey = GlobalKey<FormState>();
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
-
-  // Future<String> getUser() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   final user = prefs.getString("user_id");
-  //   return user;
-  // }
 
   @override
   void dispose() {
@@ -52,6 +41,8 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
         if (state is ResultGetUserFromPrefsState) {
           if (state.id.isNotEmpty) {
             context.go(AppRouteName.mainScreen);
+            context.read<MessageBloc>().add(const FetchAllMessagesEvent(
+                "3ea1e149-bacb-4efd-9377-5bd633a72ea4"));
           }
         }
       }, builder: (context, state) {
