@@ -1,26 +1,14 @@
 import 'package:chat_app/route/route_name.dart';
 import 'package:chat_app/screens/authentication_screen.dart';
 import 'package:chat_app/screens/messages_screen.dart';
+import 'package:chat_app/screens/search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
-    initialLocation: AppRouteName.signUpScreen,
+    initialLocation: AppRouteName.authenticationScreen,
     routes: <RouteBase>[
-      // GoRoute(
-      //   path: AppRouteName.splashScreen,
-      //   builder: (BuildContext context, GoRouterState state) {
-      //     return BlocBuilder<authBloc.AuthBloc, authState.AuthState>(
-      //       buildWhen: (previous, current) =>
-      //           previous != authState.InitialAuthState(),
-      //       builder: (context, state) {
-      //         return const SplashScreen();
-      //       },
-      //     );
-      //   },
-      // ),
-
       GoRoute(
         path: AppRouteName.mainScreen,
         builder: (BuildContext context, GoRouterState state) {
@@ -28,9 +16,15 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: AppRouteName.signUpScreen,
+        path: AppRouteName.authenticationScreen,
         builder: (BuildContext context, GoRouterState state) {
           return const AuthenticationScreen();
+        },
+      ),
+      GoRoute(
+        path: AppRouteName.searchScreen,
+        builder: (BuildContext context, GoRouterState state) {
+          return const SearchScreen();
         },
       ),
     ],
