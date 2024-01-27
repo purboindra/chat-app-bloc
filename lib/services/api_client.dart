@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:chat_app/data/entities/user_entity.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 typedef TokenProvider = Future<String?> Function();
 
@@ -37,8 +38,11 @@ class ApiClient {
   }
 
   Future<List<Map<String, dynamic>>> fetchAllMessages() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final userId = prefs.getString("user_id") ?? "";
     final uri = Uri.parse('$_baseUrl/messages');
-    final response = await http.get(uri);
+    final response = await http.get(uri, headers: {"Authorization": userId});
     final decode = jsonDecode(response.body);
     if (decode != null) {
       return [];
@@ -106,7 +110,9 @@ class ApiClient {
     return <String, String>{
       HttpHeaders.contentTypeHeader: ContentType.json.value,
       HttpHeaders.acceptHeader: ContentType.json.value,
-      if (token != null) HttpHeaders.authorizationHeader: "Bearer $token"
+
+      // if (token != null)
+      HttpHeaders.authorizationHeader: "Bearer $token"
     };
   }
 }

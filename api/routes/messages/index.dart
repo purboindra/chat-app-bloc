@@ -14,13 +14,12 @@ FutureOr<Response> onRequest(RequestContext context) async {
 
 Future<Response> _get(RequestContext context) async {
   final messageRepository = context.read<MessageRepository>();
-  try {
-    final response = await messageRepository.fetchAllMessages();
-    return Response.json(statusCode: HttpStatus.ok, body: {
-      "data": response,
-    });
-  } catch (e) {
-    print('ERROR GET ALL CHATS $e');
-    return Response(statusCode: HttpStatus.internalServerError);
-  }
+  final request = await context.request;
+  final headers = request.headers;
+  final response = await messageRepository
+      .fetchAllMessages(headers[HttpHeaders.authorizationHeader] ?? "");
+  return Response.json(statusCode: response["status_code"], body: {
+    "data": response["data"],
+    "message": response["message"],
+  });
 }

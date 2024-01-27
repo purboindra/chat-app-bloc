@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:supabase/supabase.dart';
 
 class MessageRepository {
@@ -8,7 +10,6 @@ class MessageRepository {
     try {
       final response =
           await dbClient.from("messages").insert(data).select().single();
-
       return response;
     } catch (e, st) {
       print("EROR BOS $e, st: $st");
@@ -16,19 +17,25 @@ class MessageRepository {
     }
   }
 
-  Future<List<Map<String, dynamic>>> fetchAllMessages() async {
+  Future<Map<String, dynamic>> fetchAllMessages(String userId) async {
     try {
-      final response = await dbClient
-          .from("chat_rooms")
-          .select("*")
-          .eq("user_id", "${dbClient.auth.currentUser!.id}");
+      final response =
+          await dbClient.from("chat_rooms").select("*").eq("user_id", userId);
 
       print("RESPONSE FETCH ALL MESSAGES $response");
 
-      return response;
+      return {
+        "message": "Success Get All Messages",
+        "status_code": HttpStatus.ok,
+        "data": response,
+      };
     } catch (e) {
       print('ERRORR $e');
-      throw Exception(e);
+      return {
+        "message": "$e",
+        "status_code": HttpStatus.internalServerError,
+        "data": [],
+      };
     }
   }
 
