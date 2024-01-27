@@ -2,7 +2,7 @@ import 'package:chat_app/data/repositories/auth_repository_impl.dart';
 import 'package:chat_app/data/repositories/home_repository.dart';
 import 'package:chat_app/data/repositories/message_repository.dart';
 import 'package:chat_app/domain/repositories/auth_repository.dart';
-import 'package:chat_app/main.dart';
+import 'package:chat_app/domain/repositories/message_repository.dart';
 import 'package:chat_app/services/api_client.dart';
 import 'package:get_it/get_it.dart';
 
@@ -14,9 +14,9 @@ class DependencyInjection {
         () => ApiClient(tokenProvider: () async => ""));
 
     getIt.registerLazySingleton<MessageRepository>(
-      () => MessageRepository(
-        apiClient: getIt.get(),
-        webSocketClient: webSocketClient,
+      () => MessageRepositoryImpl(
+        getIt.get(),
+        // webSocketClient: webSocketClient,
       ),
     );
 

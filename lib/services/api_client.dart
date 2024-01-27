@@ -30,14 +30,14 @@ class ApiClient {
   final http.Client _httpClient;
 
   Future<Map<String, dynamic>> fetchMessages(String chatRoomId) async {
-    final uri = Uri.parse('$_baseUrl/chat-rooms/id/$chatRoomId/messages');
+    final uri = Uri.parse('$_baseUrl/messages/id/$chatRoomId/message');
     final response = await _handleRequest(
         (headers) => _httpClient.get(uri, headers: headers));
     return response;
   }
 
   Future<List<Map<String, dynamic>>> fetchAllMessages() async {
-    final uri = Uri.parse('$_baseUrl/chat-rooms');
+    final uri = Uri.parse('$_baseUrl/messages');
     final response = await http.get(uri);
     final decode = jsonDecode(response.body);
     if (decode != null) {
