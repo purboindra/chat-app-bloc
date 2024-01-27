@@ -1,5 +1,4 @@
 import 'package:chat_app/app_bloc.dart';
-import 'package:chat_app/data/repositories/home_repository.dart';
 import 'package:chat_app/di/dependency_injection.dart';
 import 'package:chat_app/di/inject.dart';
 import 'package:chat_app/domain/bloc/auth_bloc.dart';
@@ -13,14 +12,10 @@ import 'package:models/models.dart';
 
 final webSocketClient = WebSocketClient();
 
-late HomeRepository homeRepository;
-
 void main() {
   Bloc.observer = AppBlocObserver();
 
   DependencyInjection.setup();
-
-  homeRepository = inject();
 
   runApp(const MyApp());
 }
