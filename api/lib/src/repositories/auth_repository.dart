@@ -8,10 +8,8 @@ class AuthRepository {
   final SupabaseClient dbClient;
 
   Future<User?> getCurrentUser() async {
-    print("CALLEDD");
     try {
       final user = await dbClient.auth.currentUser;
-      print("CURRENT USER $user");
       if (user != null) {
         return user;
       }
