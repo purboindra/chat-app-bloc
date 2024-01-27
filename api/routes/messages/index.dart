@@ -16,8 +16,15 @@ Future<Response> _get(RequestContext context) async {
   final messageRepository = context.read<MessageRepository>();
   final request = await context.request;
   final headers = request.headers;
+
+  if (headers[HttpHeaders.authorizationHeader] == null)
+    return Response.json(
+        statusCode: HttpStatus.forbidden,
+        body: {"data": null, "message": "Unauthorized Token"});
+
   final response = await messageRepository
-      .fetchAllMessages(headers[HttpHeaders.authorizationHeader] ?? "");
+      .fetchAllMessages(headers[HttpHeaders.authorizationHeader]!);
+
   return Response.json(statusCode: response["status_code"], body: {
     "data": response["data"],
     "message": response["message"],
