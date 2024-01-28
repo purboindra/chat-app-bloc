@@ -37,9 +37,24 @@ class ApiClient {
     return response;
   }
 
+  Future<List<UserEntity>> searchUser(String query) async {
+    List<UserEntity> users = [];
+    final uri = Uri.parse('$_baseUrl/search?name=$query');
+    final response = await http.get(
+      uri,
+    );
+    final decode = jsonDecode(response.body);
+    if (decode == null) {
+      return users;
+    }
+    for (final user in decode["data"]) {
+      users.add(UserEntity.fromJson(user as Map<String, dynamic>));
+    }
+    return users;
+  }
+
   Future<List<Map<String, dynamic>>> fetchAllMessages() async {
     final prefs = await SharedPreferences.getInstance();
-
     final userId = prefs.getString("user_id") ?? "";
     final uri = Uri.parse('$_baseUrl/messages');
     final response = await http.get(uri, headers: {"Authorization": userId});
