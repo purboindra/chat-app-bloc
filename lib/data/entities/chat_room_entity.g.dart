@@ -11,7 +11,11 @@ ChatRoomEntity _$ChatRoomEntityFromJson(Map<String, dynamic> json) =>
       id: json['id'] as String?,
       lastMessageId: json['last_message_id'] as String?,
       userId: json['user_id'] as String?,
-      createdAt: json['created_at'] as int?,
+      createdAt: json['created_at'] as String?,
+      avatarUrl: json['avatar_url'] as String?,
+      email: json['email'] as String?,
+      token: json['token'] as String?,
+      username: json['username'] as String?,
     );
 
 Map<String, dynamic> _$ChatRoomEntityToJson(ChatRoomEntity instance) =>
@@ -20,4 +24,8 @@ Map<String, dynamic> _$ChatRoomEntityToJson(ChatRoomEntity instance) =>
       'last_message_id': instance.lastMessageId,
       'user_id': instance.userId,
       'created_at': instance.createdAt,
+      'username': instance.username,
+      'email': instance.email,
+      'token': instance.token,
+      'avatar_url': instance.avatarUrl,
     };
