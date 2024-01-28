@@ -1,3 +1,4 @@
+import 'package:chat_app/data/entities/chat_room_entity.dart';
 import 'package:chat_app/data/entities/message_entity.dart';
 import 'package:equatable/equatable.dart';
 
@@ -22,10 +23,23 @@ class ErrorAllMessageState extends MessageState {
 }
 
 class SuccessAllMessageState extends MessageState {
-  final List<MessageEntity> messages;
+  final List<ChatRoomEntity> messages;
 
   const SuccessAllMessageState(this.messages);
 
   @override
   List<Object> get props => [messages];
 }
+
+final class LoadingFetchMessage extends MessageState {}
+
+final class SuccessFetchMessage extends MessageState {
+  final List<MessageEntity> message;
+
+  const SuccessFetchMessage(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+final class SuccessSendMessage extends MessageState {}
