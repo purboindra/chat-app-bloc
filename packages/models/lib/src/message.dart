@@ -10,6 +10,7 @@ class Message extends Equatable {
   final String? content;
   final Attachment? attachment;
   final DateTime createdAt;
+  // final String token;
 
   const Message({
     this.id,
@@ -18,6 +19,7 @@ class Message extends Equatable {
     required this.receiverUserId,
     this.content,
     this.attachment,
+    // required this.token,
     required this.createdAt,
   });
 
@@ -29,9 +31,11 @@ class Message extends Equatable {
     String? content,
     Attachment? attachment,
     DateTime? createdAt,
+    String? token,
   }) {
     return Message(
       id: id ?? this.id,
+      // token: token ?? this.token,
       chatRoomId: chatRoomId ?? this.chatRoomId,
       senderUserId: senderUserId ?? this.senderUserId,
       receiverUserId: receiverUserId ?? this.receiverUserId,
@@ -44,6 +48,7 @@ class Message extends Equatable {
   factory Message.fromJson(Map<String, dynamic> json) {
     return Message(
       id: json['id'] ?? const Uuid().v4(),
+      // token: json["token"] ?? "",
       chatRoomId: json['chat_room_id'] ?? '',
       senderUserId: json['sender_user_id'] ?? '',
       receiverUserId: json['receiver_user_id'] ?? '',
@@ -62,6 +67,7 @@ class Message extends Equatable {
       'receiver_user_id': receiverUserId,
       'content': content,
       'created_at': createdAt.toIso8601String(),
+      // 'token': token,
     };
   }
 

@@ -46,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: ListView.builder(
                         itemCount: state.messages.length,
                         itemBuilder: (context, index) {
-                          return Text("${state.messages[index]}");
+                          return Text("${state.messages[index].email}");
                         },
                       ),
                     )

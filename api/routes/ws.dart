@@ -19,17 +19,17 @@ Future<Response> onRequest(RequestContext context) async {
 
       switch (event) {
         case 'message.create':
-          messageRepository
-              .createMessage(jsonDecode(jsonEncode(data)))
-              .then((message) {
-            print("CREATE MESSAGE $message");
-            channel.sink.add(jsonEncode({
-              'event': 'message.created',
-              'message': data,
-            }));
-          }).catchError((e) {
-            print('ERROR ON REQUEST WS $e');
-          });
+          // messageRepository
+          //     .createMessage(jsonDecode(jsonEncode(data)))
+          //     .then((message) {
+          //   print("CREATE MESSAGE $message");
+          //   channel.sink.add(jsonEncode({
+          //     'event': 'message.created',
+          //     'message': data,
+          //   }));
+          // }).catchError((e) {
+          //   print('ERROR ON REQUEST WS $e');
+          // });
           break;
         default:
       }
