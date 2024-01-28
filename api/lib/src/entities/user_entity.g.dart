@@ -19,6 +19,7 @@ UserEntity _$UserEntityFromJson(Map<String, dynamic> json) => UserEntity(
       updatedAt: json['updated_at'] == null
           ? null
           : DateTime.parse(json['updated_at'] as String),
+      token: json['token'] as String?,
     );
 
 Map<String, dynamic> _$UserEntityToJson(UserEntity instance) =>
@@ -26,6 +27,7 @@ Map<String, dynamic> _$UserEntityToJson(UserEntity instance) =>
       'id': instance.id,
       'email': instance.email,
       'password': instance.password,
+      'token': instance.token,
       'created_at': instance.createdAt?.toIso8601String(),
       'phone': instance.phoneNumber,
       'username': instance.userName,

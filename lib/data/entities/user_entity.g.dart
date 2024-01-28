@@ -15,6 +15,7 @@ UserEntity _$UserEntityFromJson(Map<String, dynamic> json) => UserEntity(
       userName: json['username'] as String?,
       avatarUrl: json['avatar_url'] as String?,
       updatedAt: json['updated_at'] as String?,
+      token: json['token'] as String?,
     );
 
 Map<String, dynamic> _$UserEntityToJson(UserEntity instance) =>
@@ -23,6 +24,7 @@ Map<String, dynamic> _$UserEntityToJson(UserEntity instance) =>
       'email': instance.email,
       'password': instance.password,
       'created_at': instance.createdAt,
+      'token': instance.token,
       'phone': instance.phoneNumber,
       'username': instance.userName,
       'avatar_url': instance.avatarUrl,

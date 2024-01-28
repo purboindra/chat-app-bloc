@@ -8,6 +8,7 @@ class UserEntity {
   String? email;
   String? password;
   String? createdAt;
+  String? token;
   @JsonKey(name: "phone")
   String? phoneNumber;
   @JsonKey(name: "username")
@@ -25,6 +26,7 @@ class UserEntity {
     this.userName,
     this.avatarUrl,
     this.updatedAt,
+    this.token,
   });
 
   factory UserEntity.fromJson(Map<String, dynamic> json) =>
