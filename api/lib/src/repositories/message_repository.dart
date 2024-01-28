@@ -9,18 +9,26 @@ class MessageRepository {
   Future<Map<String, dynamic>> createMessage(
       Map<String, dynamic> data, String token) async {
     try {
-      await dbClient.from("chat_rooms").insert({
-        "user_id": data["sender_user_id"],
-        "id": data["receiver_user_id"],
-        "token": token,
-      }).select();
+      final chatRooms = await dbClient
+          .from("chat_rooms")
+          .select()
+          .eq("id", data["receiver_user_id"])
+          .select();
 
       final response = await dbClient.from("messages").insert(data).select();
 
-      await dbClient
-          .from("chat_rooms")
-          .update({"last_message_id": response.first["id"]}).eq(
-              "id", data["receiver_user_id"]);
+      if (chatRooms.isEmpty) {
+        await dbClient.from("chat_rooms").insert({
+          "user_id": data["sender_user_id"],
+          "id": data["receiver_user_id"],
+          "token": token,
+        }).select();
+      } else {
+        await dbClient.from("chat_rooms").update({
+          "last_message_id": response.first["id"],
+          "created_at": response.first["created_at"]
+        }).eq("id", data["receiver_user_id"]);
+      }
 
       return response.first;
     } catch (e, st) {
