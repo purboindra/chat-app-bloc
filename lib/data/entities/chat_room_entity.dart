@@ -7,12 +7,20 @@ class ChatRoomEntity {
   String? id;
   String? lastMessageId;
   String? userId;
-  int? createdAt;
+  String? createdAt;
+  String? username;
+  String? email;
+  String? token;
+  String? avatarUrl;
   ChatRoomEntity({
     this.id,
     this.lastMessageId,
     this.userId,
     this.createdAt,
+    this.avatarUrl,
+    this.email,
+    this.token,
+    this.username,
   });
 
   factory ChatRoomEntity.fromJson(Map<String, dynamic> json) =>
