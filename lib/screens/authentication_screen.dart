@@ -39,10 +39,9 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
       body: BlocConsumer<AuthenticationBloc, AuthenticationState>(
           listener: (context, state) {
         if (state is ResultGetUserFromPrefsState) {
-          if (state.id.isNotEmpty) {
+          if (state.token.isNotEmpty) {
             context.go(AppRouteName.mainScreen);
-            context.read<MessageBloc>().add(const FetchAllMessagesEvent(
-                "3ea1e149-bacb-4efd-9377-5bd633a72ea4"));
+            context.read<MessageBloc>().add(FetchAllMessagesEvent(state.token));
           }
         }
       }, builder: (context, state) {
