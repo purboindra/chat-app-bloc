@@ -47,7 +47,7 @@ class MessageRepository {
           .eq("token", token)
           .select('''
                   id,users:id
-                  ''');
+                  ''').order("created_at", ascending: false);
 
       for (final data in response) {
         final response = await dbClient
