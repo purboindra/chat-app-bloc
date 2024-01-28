@@ -6,28 +6,53 @@ class MessageRepository {
   MessageRepository({required this.dbClient});
   final SupabaseClient dbClient;
 
-  Future<Map<String, dynamic>> createMessage(Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> createMessage(
+      Map<String, dynamic> data, String token) async {
     try {
-      final response =
-          await dbClient.from("messages").insert(data).select().single();
-      return response;
+      await dbClient.from("chat_rooms").insert({
+        "user_id": data["sender_user_id"],
+        "id": data["receiver_user_id"],
+        "token": token,
+      }).select();
+
+      final response = await dbClient.from("messages").insert(data).select();
+
+      await dbClient
+          .from("chat_rooms")
+          .update({"last_message_id": response.first["id"]}).eq(
+              "id", data["receiver_user_id"]);
+
+      return response.first;
     } catch (e, st) {
-      print("EROR BOS $e, st: $st");
+      print("EROR CREATE MESSAGE $e, st: $st");
       throw Exception(e);
     }
   }
 
   Future<Map<String, dynamic>> fetchAllMessages(String token) async {
     try {
-      final response =
-          await dbClient.from("chat_rooms").select("*").eq("token", token);
+      List<dynamic> users = [];
 
-      print("RESPONSE FETCH ALL MESSAGES $response");
+      final response = await dbClient
+          .from("chat_rooms")
+          .select("*")
+          .eq("token", token)
+          .select('''
+                  id,users:id
+                  ''');
+
+      for (final data in response) {
+        final response = await dbClient
+            .from("users")
+            .select("username,avatar_url,email,id,token")
+            .eq("id", data["users"]);
+        users.add(response.first);
+      }
 
       return {
         "message": "Success Get All Messages",
         "status_code": HttpStatus.ok,
-        "data": response,
+        "data": users,
       };
     } catch (e) {
       print('ERRORR $e');
