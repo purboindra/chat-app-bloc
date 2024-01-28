@@ -25,11 +25,11 @@ Future<Response> _post(RequestContext context) async {
         body: {"data": null, "message": "Unauthorized"});
 
   final response = await messageRepository.createMessage(
-      data, headers[HttpHeaders.authorizationHeader] ?? "");
+      data, headers[HttpHeaders.authorizationHeader]!);
+
   return Response.json(
     statusCode: HttpStatus.ok,
     body: {
-      "status_code": HttpStatus.ok,
       "data": response,
       "message": "Success send a message",
     },
