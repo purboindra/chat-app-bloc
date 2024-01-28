@@ -16,7 +16,7 @@ Future<Response> _get(RequestContext context) async {
   final searchRepo = context.read<SearchRepository>();
   final request = context.request;
   final queryParams = request.uri.queryParameters;
-  final headers = context.request.headers;
+  final headers = request.headers;
 
   if (headers[HttpHeaders.authorizationHeader] == null)
     return Response.json(
