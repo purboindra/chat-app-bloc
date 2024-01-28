@@ -7,8 +7,8 @@ class UserEntity {
   String? id;
   String? email;
   String? password;
-  String? createdAt;
   String? token;
+  DateTime? createdAt;
   @JsonKey(name: "phone")
   String? phoneNumber;
   @JsonKey(name: "username")
@@ -16,7 +16,10 @@ class UserEntity {
   @JsonKey(name: "avatar_url")
   String? avatarUrl;
   @JsonKey(name: "updated_at")
-  String? updatedAt;
+  DateTime? updatedAt;
+  int? expiresAt;
+  int? expiresIn;
+  String? refreshToken;
   UserEntity({
     this.id,
     this.email,
@@ -26,9 +29,14 @@ class UserEntity {
     this.userName,
     this.avatarUrl,
     this.updatedAt,
+    this.expiresAt,
+    this.expiresIn,
+    this.refreshToken,
     this.token,
   });
 
   factory UserEntity.fromJson(Map<String, dynamic> json) =>
       _$UserEntityFromJson(json);
+
+  Map<String, dynamic> toJson() => _$UserEntityToJson(this);
 }

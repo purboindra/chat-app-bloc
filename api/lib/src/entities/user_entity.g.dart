@@ -20,6 +20,9 @@ UserEntity _$UserEntityFromJson(Map<String, dynamic> json) => UserEntity(
           ? null
           : DateTime.parse(json['updated_at'] as String),
       token: json['token'] as String?,
+      expiresAt: json['expires_at'] as int?,
+      expiresIn: json['expires_in'] as int?,
+      refreshToken: json['refresh_token'] as String?,
     );
 
 Map<String, dynamic> _$UserEntityToJson(UserEntity instance) =>
@@ -33,4 +36,7 @@ Map<String, dynamic> _$UserEntityToJson(UserEntity instance) =>
       'username': instance.userName,
       'avatar_url': instance.avatarUrl,
       'updated_at': instance.updatedAt?.toIso8601String(),
+      'expires_at': instance.expiresAt,
+      'expires_in': instance.expiresIn,
+      'refresh_token': instance.refreshToken,
     };
