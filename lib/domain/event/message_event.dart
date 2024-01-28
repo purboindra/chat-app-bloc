@@ -8,10 +8,10 @@ sealed class MessageEvent extends Equatable {
 }
 
 final class FetchAllMessagesEvent extends MessageEvent {
-  final String userId;
+  final String token;
 
-  const FetchAllMessagesEvent(this.userId);
+  const FetchAllMessagesEvent(this.token);
 
   @override
-  List<Object> get props => [userId];
+  List<Object> get props => [token];
 }

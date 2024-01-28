@@ -17,10 +17,10 @@ class MessageRepository {
     }
   }
 
-  Future<Map<String, dynamic>> fetchAllMessages(String userId) async {
+  Future<Map<String, dynamic>> fetchAllMessages(String token) async {
     try {
       final response =
-          await dbClient.from("chat_rooms").select("*").eq("user_id", userId);
+          await dbClient.from("chat_rooms").select("*").eq("token", token);
 
       print("RESPONSE FETCH ALL MESSAGES $response");
 

@@ -55,9 +55,9 @@ class ApiClient {
 
   Future<List<Map<String, dynamic>>> fetchAllMessages() async {
     final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString("user_id") ?? "";
+    final token = prefs.getString("token") ?? "";
     final uri = Uri.parse('$_baseUrl/messages');
-    final response = await http.get(uri, headers: {"Authorization": userId});
+    final response = await http.get(uri, headers: {"Authorization": token});
     final decode = jsonDecode(response.body);
     if (decode != null) {
       return [];
