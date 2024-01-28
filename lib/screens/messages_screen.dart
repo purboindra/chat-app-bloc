@@ -1,7 +1,9 @@
 import 'package:chat_app/domain/bloc/message_bloc.dart';
 import 'package:chat_app/domain/state/message_state.dart';
+import 'package:chat_app/route/route_name.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -56,6 +58,22 @@ class _HomeScreenState extends State<HomeScreen> {
           return const SizedBox();
         },
       ),
+      floatingActionButton:
+          Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+        FloatingActionButton(
+          onPressed: () {},
+          heroTag: null,
+          child: const Icon(Icons.logout),
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        FloatingActionButton(
+          onPressed: () => context.push(AppRouteName.searchScreen),
+          heroTag: null,
+          child: const Icon(Icons.add),
+        )
+      ]),
     );
   }
 }
