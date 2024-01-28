@@ -25,7 +25,7 @@ Future<Response> _get(RequestContext context) async {
 
   if (queryParams["name"] == null)
     return Response.json(
-        statusCode: HttpStatus.badRequest,
+        statusCode: HttpStatus.ok,
         body: {"data": [], "message": "No User Found"});
 
   final response = await searchRepo.searchUser(
