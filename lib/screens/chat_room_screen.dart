@@ -244,7 +244,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                                                 prefs.getString("token") ?? "",
                                               ));
                                         });
-                                        // _sendMessage();
                                       },
                                       icon: const Icon(Icons.send),
                                     ),
