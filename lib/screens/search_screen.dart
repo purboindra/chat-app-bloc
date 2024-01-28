@@ -1,8 +1,10 @@
 import 'package:chat_app/domain/bloc/search_bloc.dart';
 import 'package:chat_app/domain/event/search_event.dart';
 import 'package:chat_app/domain/state/search_state.dart';
+import 'package:chat_app/route/route_name.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -65,6 +67,10 @@ class _SearchScreenState extends State<SearchScreen> {
                       itemBuilder: (context, index) {
                         final user = state.users[index];
                         return ListTile(
+                          onTap: () =>
+                              context.push(AppRouteName.chatRoomScreen, extra: {
+                            "user": user.toJson(),
+                          }),
                           title: Text(user.userName ?? ""),
                           subtitle: Text(user.email ?? ""),
                         );
