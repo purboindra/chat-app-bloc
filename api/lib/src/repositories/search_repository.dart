@@ -7,11 +7,14 @@ class SearchRepository {
 
   final SupabaseClient dbClient;
 
-  Future<Map<String, dynamic>> searchUser(String query) async {
+  Future<Map<String, dynamic>> searchUser(String query, String token) async {
     try {
-      final response =
-          await dbClient.from("users").select("*").gte("username", query);
-      print("DATA SEARCH $response");
+      final response = await dbClient
+          .from("users")
+          .select("*")
+          .neq('token', token)
+          .textSearch("username", query);
+
       return {
         "message": "Success Search User",
         "status_code": HttpStatus.ok,

@@ -8,8 +8,8 @@ class SearchRepositoryImpl implements SearchRepository {
   const SearchRepositoryImpl(this.apiClient);
 
   @override
-  Future<List<UserEntity>> searchUser(String query) async {
-    final response = await apiClient.searchUser(query);
+  Future<List<UserEntity>> searchUser(String query, String? token) async {
+    final response = await apiClient.searchUser(query, token ?? '');
     return response;
   }
 }

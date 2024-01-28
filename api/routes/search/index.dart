@@ -15,9 +15,23 @@ FutureOr<Response> onRequest(RequestContext context) async {
 Future<Response> _get(RequestContext context) async {
   final searchRepo = context.read<SearchRepository>();
   final request = context.request;
-  final response =
-      await searchRepo.searchUser(request.uri.queryParameters["name"] ?? "");
-  print("DATA SEARCH _GET $response");
+  final queryParams = request.uri.queryParameters;
+  final headers = context.request.headers;
+
+  if (headers[HttpHeaders.authorizationHeader] == null)
+    return Response.json(
+        statusCode: HttpStatus.unauthorized,
+        body: {"data": [], "message": "Invalid Token Credentials"});
+
+  if (queryParams["name"] == null)
+    return Response.json(
+        statusCode: HttpStatus.badRequest,
+        body: {"data": [], "message": "No User Found"});
+
+  final response = await searchRepo.searchUser(
+      request.uri.queryParameters["name"]!,
+      headers[HttpHeaders.authorizationHeader]!);
+
   return Response.json(
       statusCode: response["status_code"],
       body: {"data": response["data"], "message": response["message"]});
