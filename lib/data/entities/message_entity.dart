@@ -16,7 +16,7 @@ class MessageEntity {
   @JsonKey(name: "attachment_id")
   String? attachmentId;
   @JsonKey(name: "created_at")
-  int? createdAt;
+  String? createdAt;
   MessageEntity({
     this.id,
     this.chatRoomId,
@@ -26,6 +26,14 @@ class MessageEntity {
     this.attachmentId,
     this.createdAt,
   });
+
+  // final String? id;
+  // final String chatRoomId;
+  // final String senderUserId;
+  // final String receiverUserId;
+  // final String? content;
+  // final Attachment? attachment;
+  // final DateTime createdAt;
 
   factory MessageEntity.fromJson(Map<String, dynamic> json) =>
       _$MessageEntityFromJson(json);

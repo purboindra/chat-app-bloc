@@ -14,7 +14,7 @@ MessageEntity _$MessageEntityFromJson(Map<String, dynamic> json) =>
       receiverUserId: json['receiver_user_id'] as String?,
       message: json['content'] as String?,
       attachmentId: json['attachment_id'] as String?,
-      createdAt: json['created_at'] as int?,
+      createdAt: json['created_at'] as String?,
     );
 
 Map<String, dynamic> _$MessageEntityToJson(MessageEntity instance) =>
