@@ -37,12 +37,13 @@ class ApiClient {
     return response;
   }
 
-  Future<List<UserEntity>> searchUser(String query) async {
+  Future<List<UserEntity>> searchUser(String query, String token) async {
     List<UserEntity> users = [];
     final uri = Uri.parse('$_baseUrl/search?name=$query');
-    final response = await http.get(
-      uri,
-    );
+
+    final response = await http.get(uri, headers: {
+      HttpHeaders.authorizationHeader: token,
+    });
     final decode = jsonDecode(response.body);
     if (decode == null) {
       return users;
@@ -50,6 +51,7 @@ class ApiClient {
     for (final user in decode["data"]) {
       users.add(UserEntity.fromJson(user as Map<String, dynamic>));
     }
+
     return users;
   }
 

@@ -52,6 +52,14 @@ class _SearchScreenState extends State<SearchScreen> {
                       child: CircularProgressIndicator.adaptive(),
                     );
                   } else if (state is SuccessGetSearchUser) {
+                    if (state.users.isEmpty) {
+                      return Center(
+                        child: Text(
+                          "Sorry, ${_searchC.text} not found, please make sure user is already exist!",
+                          textAlign: TextAlign.center,
+                        ),
+                      );
+                    }
                     return ListView.builder(
                       itemCount: state.users.length,
                       itemBuilder: (context, index) {

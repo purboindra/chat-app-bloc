@@ -4,6 +4,7 @@ import 'package:chat_app/domain/repositories/search_repository.dart';
 import 'package:chat_app/domain/state/search_state.dart';
 import 'package:chat_app/utils/app_print.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SearchBloc extends BaseBloc<SearchEvent, SearchState> {
   SearchBloc(this.searchRepository) : super(const InitialLoadingSearch()) {
@@ -14,7 +15,10 @@ class SearchBloc extends BaseBloc<SearchEvent, SearchState> {
       SearchUserEvent event, Emitter<SearchState> emit) async {
     emit(const LoadingSearchUser());
     try {
-      final result = await searchRepository.searchUser(event.query);
+      final prefs = await SharedPreferences.getInstance();
+
+      final result = await searchRepository.searchUser(
+          event.query, prefs.getString("token"));
       emit(SuccessGetSearchUser(result));
     } catch (e, st) {
       AppPrint.debugPrint("ERROR SEARCH: $e $st");
