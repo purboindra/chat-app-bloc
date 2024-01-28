@@ -23,12 +23,12 @@ final class ErrorAuthState extends AuthenticationState {
 }
 
 final class ResultGetUserFromPrefsState extends AuthenticationState {
-  final String id;
+  final String token;
 
-  const ResultGetUserFromPrefsState(this.id);
+  const ResultGetUserFromPrefsState(this.token);
 
   @override
-  List<Object> get props => [id];
+  List<Object> get props => [token];
 }
 
 final class LoadingGetUserFromPrefsState extends AuthenticationState {}

@@ -18,6 +18,7 @@ class AuthenticationBloc
     emit(LoadingGetUserFromPrefsState());
     final prefs = await SharedPreferences.getInstance();
     final result = prefs.getString("user_id") ?? "";
+    AppPrint.debugPrint("current user $result");
     emit(ResultGetUserFromPrefsState(result));
   }
 
@@ -30,6 +31,7 @@ class AuthenticationBloc
         throw Exception("Maaf, terjadi kesalahan...");
       }
       await authRepository.saveIdToPrefs(response.id ?? "");
+      await authRepository.saveTokenToPrefs(response.token ?? "");
       emit(SuccessAuthState());
     } catch (e, st) {
       AppPrint.debugPrint("ERROR FROM SIGN IN EVENT $e $st");
@@ -46,6 +48,7 @@ class AuthenticationBloc
         throw Exception("Maaf, terjadi kesalahan...");
       }
       await authRepository.saveIdToPrefs(response.id);
+      await authRepository.saveTokenToPrefs(response.token ?? "");
       emit(SuccessAuthState());
     } catch (e, st) {
       AppPrint.debugPrint("ERROR FROM SIGN IN EVENT $e $st");

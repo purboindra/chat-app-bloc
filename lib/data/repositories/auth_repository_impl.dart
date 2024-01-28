@@ -35,4 +35,11 @@ class AuthRepositoryImpl implements AuthRepository {
     if (user != null) return user;
     return null;
   }
+
+  @override
+  Future<void> saveTokenToPrefs(String? token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("token", token ?? "");
+    AppPrint.debugPrint("TOKEN $token");
+  }
 }
