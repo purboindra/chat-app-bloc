@@ -30,18 +30,29 @@ class AuthRepository {
       if (response.user == null) {
         throw Exception("Invalid Credentials");
       }
-      final user = UserEntity(
-        id: response.user!.id,
-        email: response.user!.email,
+      final session = response.session;
+      final user = response.user;
+
+      final userEntity = UserEntity(
+        id: user!.id,
+        email: user.email,
+        token: session!.accessToken,
         password: password,
         createdAt: DateTime.now(),
-        phoneNumber: response.user!.phone,
+        phoneNumber: user.phone,
+        expiresAt: session.expiresAt,
+        expiresIn: session.expiresIn,
+        refreshToken: session.refreshToken,
         userName: email.split("@")[0],
       );
+
       await dbClient
           .from("users")
-          .update(user.toJson())
+          .update(userEntity.toJson())
           .eq("id", response.user!.id);
+
+      print("SIGN UP: ${user.toJson()}");
+
       return {
         "message": null,
         "data": user.toJson(),
