@@ -51,8 +51,6 @@ class AuthRepository {
           .update(userEntity.toJson())
           .eq("id", response.user!.id);
 
-      print("SIGN UP: ${user.toJson()}");
-
       return {
         "message": null,
         "data": user.toJson(),
