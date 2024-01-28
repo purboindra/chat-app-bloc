@@ -19,7 +19,7 @@ Future<Response> _get(RequestContext context) async {
 
   if (headers[HttpHeaders.authorizationHeader] == null)
     return Response.json(
-        statusCode: HttpStatus.forbidden,
+        statusCode: HttpStatus.unauthorized,
         body: {"data": null, "message": "Unauthorized"});
 
   final response = await messageRepository
