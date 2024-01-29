@@ -1,14 +1,12 @@
-import 'dart:developer';
-
 import 'package:chat_app/data/entities/user_entity.dart';
 import 'package:chat_app/domain/bloc/message_bloc.dart';
 import 'package:chat_app/domain/event/message_event.dart';
 import 'package:chat_app/domain/state/message_state.dart';
-import 'package:chat_app/main.dart';
+import 'package:chat_app/route/route_name.dart';
 import 'package:chat_app/widgets/avatar.dart';
-import 'package:chat_app/widgets/message_bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:models/models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,25 +14,23 @@ class ChatRoomScreen extends StatefulWidget {
   const ChatRoomScreen({
     super.key,
     required this.participantUser,
+    required this.uid,
   });
 
   final UserEntity participantUser;
+  final String uid;
 
   @override
   State<ChatRoomScreen> createState() => _ChatRoomScreenState();
 }
 
 class _ChatRoomScreenState extends State<ChatRoomScreen> {
-  final List<Message> messages = [];
-  final messageController = TextEditingController();
-
-  final bool _isLoading = false;
+  final _messageController = TextEditingController();
 
   @override
   void initState() {
-    context
-        .read<MessageBloc>()
-        .add(const FetchMessageEvent("ad2769e8-6e72-4bee-8833-f9d8e02d6810"));
+    // context.read<AuthenticationBloc>().add(FetchUserEvent(widget.uid));
+    context.read<MessageBloc>().add(FetchMessageEvent(widget.uid));
     // _loadMessages();
     // _startWebSocket();
     // messageRepository.subscribeToMessageUpdate((p0) {
@@ -51,49 +47,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     super.initState();
   }
 
-  // _loadMessages() async {
-  //   setState(() {
-  //     _isLoading = true;
-  //   });
-  //   try {
-  //     final tempMessage =
-  //         await widget.messageRepository.fetchMessages(widget.chatRoom.id);
-  //     tempMessage.sort((a, b) => a.createdAt.compareTo(b.createdAt));
-  //     setState(() {
-  //       messages.addAll(tempMessage);
-  //     });
-  //   } catch (e, st) {
-  //     log("ERROR LOAD MESSAGE $e $st");
-  //   } finally {
-  //     setState(() {
-  //       _isLoading = false;
-  //     });
-  //   }
-  // }
-
-  _startWebSocket() {
-    log("WEB SOCKET STARTED");
-    webSocketClient.connect('ws://localhost:8080/ws', {
-      "Authorization": 'Bearer ...',
-    });
-  }
-
-  // void _sendMessage() async {
-  //   final message = Message(
-  //     chatRoomId: widget.chatRoom.id,
-  //     senderUserId: userId1,
-  //     receiverUserId: userId2,
-  //     content: messageController.text,
-  //     createdAt: DateTime.now(),
-  //   );
-
-  //   await widget.messageRepository.createMessage(message);
-  //   messageController.clear();
-  // }
-
   @override
   void dispose() {
-    messageController.dispose();
+    _messageController.dispose();
     super.dispose();
   }
 
@@ -101,13 +57,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   Widget build(BuildContext context) {
     final viewInsets = MediaQuery.viewInsetsOf(context);
 
-    // final currentParticipantUser = widget.chatRoom.participants.firstWhere(
-    //   (element) => element.id == userId1,
-    // );
-
-    // final otherParticipantUser = widget.chatRoom.participants.firstWhere(
-    //   (element) => element.id != currentParticipantUser.id,
-    // );
     return BlocConsumer<MessageBloc, MessageState>(
       listener: (context, state) {
         // TODO: implement listener
@@ -124,6 +73,15 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         } else if (state is SuccessFetchMessage) {
           return Scaffold(
             appBar: AppBar(
+              leading: IconButton(
+                onPressed: () {
+                  //  context.read<MessageBloc>().add(FetchAllMessagesEvent(state.message.firstWhere((element) => element.id==widget.uid)));
+                  context.pushReplacement(AppRouteName.mainScreen);
+                },
+                icon: const Icon(
+                  Icons.chevron_left,
+                ),
+              ),
               centerTitle: true,
               title: Column(
                 children: [
@@ -136,7 +94,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                     radius: 20,
                   ),
                   Text(
-                    widget.participantUser.userName ?? "",
+                    "",
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -153,9 +111,14 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                 ),
               ],
             ),
-            body: _isLoading
+            body: state.message.isEmpty
                 ? const Center(
-                    child: CircularProgressIndicator(),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Start a new messages..."),
+                      ],
+                    ),
                   )
                 : SafeArea(
                     child: Padding(
@@ -168,35 +131,24 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                         children: [
                           Expanded(
                             child: ListView.builder(
-                                itemCount: messages.length,
+                                itemCount: state.message.length,
                                 itemBuilder: (context, index) {
-                                  final message = messages[index];
+                                  final message = state.message[index];
 
-                                  final showImage =
-                                      index + 1 == messages.length ||
-                                          messages[index + 1].senderUserId !=
-                                              message.senderUserId;
-
-                                  return Row(
-                                    mainAxisAlignment:
-                                        (message.senderUserId == userId1)
-                                            ? MainAxisAlignment.start
-                                            : MainAxisAlignment.end,
-                                    children: [
-                                      if (showImage &&
-                                          message.senderUserId == userId1)
-                                        const Avatar(
-                                            imageUrl:
-                                                "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=3276&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                                            radius: 12),
-                                      if (showImage &&
-                                          message.senderUserId != userId1)
-                                        const Avatar(
-                                            imageUrl:
-                                                "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                                            radius: 12),
-                                      MessageBubble(message: message),
-                                    ],
+                                  return Align(
+                                    alignment:
+                                        state.message[index].id != widget.uid
+                                            ? Alignment.topRight
+                                            : Alignment.topLeft,
+                                    child: ListTile(
+                                      leading: const SizedBox(),
+                                      trailing: const SizedBox(),
+                                      title: Text(message.message ?? ""),
+                                      subtitle: Text(
+                                          DateTime.parse(message.createdAt!)
+                                              .day
+                                              .toString()),
+                                    ),
                                   );
                                 }),
                           ),
@@ -210,7 +162,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                               ),
                               Expanded(
                                 child: TextFormField(
-                                  controller: messageController,
+                                  controller: _messageController,
                                   decoration: InputDecoration(
                                     filled: true,
                                     fillColor: Theme.of(context)
@@ -234,7 +186,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                                                     "",
                                             receiverUserId:
                                                 widget.participantUser.id ?? "",
-                                            content: messageController.text,
+                                            content: _messageController.text,
                                             createdAt: DateTime.now());
                                         await Future.delayed(Duration.zero, () {
                                           context
