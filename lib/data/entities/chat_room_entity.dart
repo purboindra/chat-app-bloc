@@ -25,4 +25,6 @@ class ChatRoomEntity {
 
   factory ChatRoomEntity.fromJson(Map<String, dynamic> json) =>
       _$ChatRoomEntityFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ChatRoomEntityToJson(this);
 }
