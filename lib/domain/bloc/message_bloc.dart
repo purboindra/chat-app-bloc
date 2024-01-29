@@ -29,11 +29,6 @@ class MessageBloc extends BaseBloc<MessageEvent, MessageState> {
     emit(LoadingAllMessageState());
     try {
       final response = await messageRepository.fetchAllMessages();
-
-      for (final a in response) {
-        AppPrint.debugPrint("BLOC ${a.email}");
-      }
-
       emit(SuccessAllMessageState(response));
     } catch (e, st) {
       AppPrint.debugPrint("ERROR FETCH ALL MESSAGES $e $st");

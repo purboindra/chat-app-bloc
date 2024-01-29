@@ -17,7 +17,16 @@ class MessageRepositoryImpl implements MessageRepository {
     final response = await apiClient.fetchAllMessages();
     if (response.isEmpty) return messages;
     for (final message in response) {
-      messages.add(ChatRoomEntity.fromJson(message));
+      final chatRoomData = ChatRoomEntity(
+          avatarUrl: message["user"]["avatar_url"],
+          createdAt: message["messages"]["created_at"],
+          email: message["user"]["email"],
+          id: message["user"]["id"],
+          lastMessageId: message["messages"]["last_message_id"],
+          token: message["user"]["token"],
+          userId: message["messages"]["user_id"],
+          username: message["user"]["username"]);
+      messages.add(ChatRoomEntity.fromJson(chatRoomData.toJson()));
     }
     return messages;
   }

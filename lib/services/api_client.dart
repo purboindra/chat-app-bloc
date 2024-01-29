@@ -75,9 +75,11 @@ class ApiClient {
     final response =
         await http.get(uri, headers: {HttpHeaders.authorizationHeader: token});
     final decode = jsonDecode(response.body);
+
     if (decode == null) {
       return [];
     }
+
     final data = List<Map<String, dynamic>>.from(decode["data"]);
 
     return data;

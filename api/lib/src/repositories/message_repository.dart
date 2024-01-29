@@ -39,28 +39,26 @@ class MessageRepository {
 
   Future<Map<String, dynamic>> fetchAllMessages(String token) async {
     try {
-      List<dynamic> users = [];
+      List<dynamic> userData = [];
 
       final response = await dbClient
           .from("chat_rooms")
           .select("*")
           .eq("token", token)
-          .select('''
-                  id,users:id
-                  ''').order("created_at", ascending: false);
+          .order("created_at", ascending: false);
 
       for (final data in response) {
-        final response = await dbClient
+        final responseUser = await dbClient
             .from("users")
             .select("username,avatar_url,email,id,token")
-            .eq("id", data["users"]);
-        users.add(response.first);
+            .eq("id", data["id"]);
+        userData.add({"user": responseUser.first, "messages": data});
       }
 
       return {
         "message": "Success Get All Messages",
         "status_code": HttpStatus.ok,
-        "data": users,
+        "data": userData,
       };
     } catch (e) {
       print('ERRORR $e');
