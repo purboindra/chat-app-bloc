@@ -37,4 +37,6 @@ class MessageEntity {
 
   factory MessageEntity.fromJson(Map<String, dynamic> json) =>
       _$MessageEntityFromJson(json);
+
+  Map<String, dynamic> toJson() => _$MessageEntityToJson(this);
 }
