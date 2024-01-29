@@ -37,3 +37,12 @@ final class SaveId extends AuthenticationEvent {
 }
 
 final class GetUserFromPrefsEvent extends AuthenticationEvent {}
+
+final class FetchUserEvent extends AuthenticationEvent {
+  final String id;
+
+  const FetchUserEvent(this.id);
+
+  @override
+  List<Object> get props => [id];
+}

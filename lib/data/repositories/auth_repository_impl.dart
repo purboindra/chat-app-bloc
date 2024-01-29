@@ -42,4 +42,11 @@ class AuthRepositoryImpl implements AuthRepository {
     await prefs.setString("token", token ?? "");
     AppPrint.debugPrint("TOKEN $token");
   }
+
+  @override
+  Future<UserEntity?> fetchUser(String id) async {
+    final response = await apiClient.fetchUser(id);
+    if (response == null) return null;
+    return response;
+  }
 }

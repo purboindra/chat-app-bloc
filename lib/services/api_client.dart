@@ -83,6 +83,17 @@ class ApiClient {
     return data;
   }
 
+  Future<UserEntity?> fetchUser(String id) async {
+    final uri = Uri.parse("$_baseUrl/auth/user?uid=$id");
+    final response = await http.get(uri);
+    final decodeData = jsonDecode(response.body);
+    if (response.statusCode != HttpStatus.ok) {
+      throw Exception(
+          "${response.statusCode}, error: ${decodeData["message"]}");
+    }
+    return UserEntity.fromJson(decodeData["data"]["data"]);
+  }
+
   Future<UserEntity?> signUp(String email, String password) async {
     final uri = Uri.parse('$_baseUrl/auth/sign-up');
     final response = await http.post(uri,

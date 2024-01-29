@@ -5,6 +5,6 @@ abstract class AuthRepository {
   Future<UserEntity?> signIn(String email, String password);
   Future<void> saveIdToPrefs(String? id);
   Future<void> saveTokenToPrefs(String? token);
-
+  Future<UserEntity?> fetchUser(String id);
   Future<String?> getIdFromPrefs(String? id);
 }

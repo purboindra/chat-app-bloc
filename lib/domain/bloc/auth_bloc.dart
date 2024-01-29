@@ -12,7 +12,20 @@ class AuthenticationBloc
     on<SignUpEvent>(_handleSignUp);
     on<SignInEvent>(_handleSignIn);
     on<GetUserFromPrefsEvent>(_handleGetUserFromPrefs);
+    on<FetchUserEvent>(_handleFetchUSer);
   }
+
+  void _handleFetchUSer(
+      FetchUserEvent event, Emitter<AuthenticationState> emit) async {
+    try {
+      final response = await authRepository.fetchUser(event.id);
+      AppPrint.debugPrint("fetch user ${response?.toJson()}");
+      emit(SuccessFetchUser(response!));
+    } catch (e) {
+      AppPrint.debugPrint("ERROR FETCH USER BLOC $e");
+    }
+  }
+
   void _handleGetUserFromPrefs(
       GetUserFromPrefsEvent event, Emitter<AuthenticationState> emit) async {
     emit(LoadingGetUserFromPrefsState());

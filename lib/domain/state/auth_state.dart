@@ -1,3 +1,4 @@
+import 'package:chat_app/data/entities/user_entity.dart';
 import 'package:equatable/equatable.dart';
 
 sealed class AuthenticationState extends Equatable {
@@ -32,3 +33,12 @@ final class ResultGetUserFromPrefsState extends AuthenticationState {
 }
 
 final class LoadingGetUserFromPrefsState extends AuthenticationState {}
+
+final class SuccessFetchUser extends AuthenticationState {
+  final UserEntity user;
+
+  const SuccessFetchUser(this.user);
+
+  @override
+  List<Object> get props => [user];
+}

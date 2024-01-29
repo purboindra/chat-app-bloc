@@ -94,4 +94,29 @@ class AuthRepository {
       };
     }
   }
+
+  Future<Map<String, dynamic>> fetchUser({required String uid}) async {
+    try {
+      final response = await dbClient.from("users").select().eq("id", uid);
+      if (response.isEmpty) {
+        return {
+          "data": null,
+          "message": "Invalid Credentials",
+          "status_code": HttpStatus.badRequest
+        };
+      }
+      return {
+        "data": response.first,
+        "message": "Successfully Fetch User",
+        "status_code": HttpStatus.ok,
+      };
+    } catch (e) {
+      print("ERROR FETCH USER $e");
+      return {
+        "data": null,
+        "message": "Sorry, Something Went Wrong",
+        "status_code": HttpStatus.internalServerError,
+      };
+    }
+  }
 }
