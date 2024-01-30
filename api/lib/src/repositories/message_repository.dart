@@ -43,16 +43,12 @@ class MessageRepository {
 
       final response = await dbClient
           .from("chat_rooms")
-          .select("*")
+          .select('*, users(*)')
           .eq("token", token)
           .order("created_at", ascending: false);
 
       for (final data in response) {
-        final responseUser = await dbClient
-            .from("users")
-            .select("username,avatar_url,email,id,token")
-            .eq("id", data["id"]);
-        userData.add({"user": responseUser.first, "messages": data});
+        userData.add({"user": data["users"], "messages": data});
       }
 
       return {
