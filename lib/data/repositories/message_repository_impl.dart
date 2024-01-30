@@ -24,7 +24,7 @@ class MessageRepositoryImpl implements MessageRepository {
           id: message["user"]["id"],
           lastMessageId: message["messages"]["last_message_id"],
           token: message["user"]["token"],
-          userId: message["messages"]["user_id"],
+          senderId: message["messages"]["user_id"],
           username: message["user"]["username"]);
       messages.add(ChatRoomEntity.fromJson(chatRoomData.toJson()));
     }

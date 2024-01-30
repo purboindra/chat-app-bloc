@@ -6,7 +6,7 @@ part 'chat_room_entity.g.dart';
 class ChatRoomEntity {
   String? id;
   String? lastMessageId;
-  String? userId;
+  String? senderId;
   String? createdAt;
   String? username;
   String? email;
@@ -15,7 +15,7 @@ class ChatRoomEntity {
   ChatRoomEntity({
     this.id,
     this.lastMessageId,
-    this.userId,
+    this.senderId,
     this.createdAt,
     this.avatarUrl,
     this.email,
