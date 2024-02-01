@@ -63,9 +63,14 @@ class ApiClient {
 
   Future<Map<String, dynamic>> fetchMessages(String chatRoomId) async {
     final uri = Uri.parse('$_baseUrl/messages/id/$chatRoomId/message');
-    final response = await _handleRequest(
-        (headers) => _httpClient.get(uri, headers: headers));
-    return response;
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString("token") ?? "";
+    final response = await http.get(uri, headers: {
+      HttpHeaders.authorizationHeader: token,
+    });
+
+    return jsonDecode(response.body);
   }
 
   Future<List<Map<String, dynamic>>> fetchAllMessages() async {
