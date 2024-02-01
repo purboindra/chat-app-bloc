@@ -9,27 +9,29 @@ Future<Response> onRequest(RequestContext context) async {
   final handler = webSocketHandler((channel, protocol) {
     channel.stream.listen((message) {
       if (message is! String) {
-        channel.sink.add('Invalid message');
+        channel.sink.add("Invalid message!");
         return;
       }
-      Map<String, dynamic> messageJson = jsonDecode(message);
-      final event = messageJson["event"];
-      final data = messageJson["data"];
-      print('event: ${event} data: $data');
 
+      final messageJson = jsonDecode(message) as Map<String, dynamic>;
+      final event = messageJson["event"];
+      final data = messageJson["message"];
+      final token = messageJson["token"];
       switch (event) {
-        case 'message.create':
-          // messageRepository
-          //     .createMessage(jsonDecode(jsonEncode(data)))
-          //     .then((message) {
-          //   print("CREATE MESSAGE $message");
-          //   channel.sink.add(jsonEncode({
-          //     'event': 'message.created',
-          //     'message': data,
-          //   }));
-          // }).catchError((e) {
-          //   print('ERROR ON REQUEST WS $e');
-          // });
+        case 'message.created':
+          messageRepository.createMessage(data, token).then(
+            (message) {
+              channel.sink.add(
+                jsonEncode({
+                  'event': 'message.created',
+                  'data': message,
+                }),
+              );
+            },
+          ).catchError((err) {
+            print('Something went wrong $err');
+          });
+
           break;
         default:
       }

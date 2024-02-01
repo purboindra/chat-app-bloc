@@ -4,12 +4,14 @@ import 'package:chat_app/data/entities/chat_room_entity.dart';
 import 'package:chat_app/data/entities/message_entity.dart';
 import 'package:chat_app/domain/repositories/message_repository.dart';
 import 'package:chat_app/services/api_client.dart';
+import 'package:chat_app/services/web_socket_client.dart';
 import 'package:models/src/message.dart';
 
 class MessageRepositoryImpl implements MessageRepository {
   final ApiClient apiClient;
+  final WebSocketClient webSocketClient;
 
-  const MessageRepositoryImpl(this.apiClient);
+  MessageRepositoryImpl(this.apiClient, this.webSocketClient);
 
   @override
   Future<List<ChatRoomEntity>> fetchAllMessages() async {
@@ -41,6 +43,22 @@ class MessageRepositoryImpl implements MessageRepository {
   @override
   Future<void> createMessage(Message message, String token) async {
     await apiClient.createMessage(message, token);
+  }
+
+  @override
+  void subscribeToMessageUpdate(
+    void Function(Map<String, dynamic> p1) onMEssageReceived,
+  ) {
+    StreamSubscription streamSubscription;
+
+    streamSubscription = webSocketClient.messageUpdate().listen((event) {
+      onMEssageReceived(event);
+    });
+  }
+
+  @override
+  void unSubscribeFromMessageUpdates(StreamSubscription streamSubscription) {
+    streamSubscription.cancel();
   }
 }
 

@@ -22,14 +22,13 @@ class WebSocketClient {
       return;
     }
 
-    log("Connecting to the server...");
     channel = IOWebSocketChannel.connect(url, headers: headers);
 
     channel!.stream.listen((event) {
       Map<String, dynamic> message = jsonDecode(event);
 
       if (message['event'] == 'message.created') {
-        messageController.add(message["message"]);
+        messageController.add(message["data"]);
       }
     }, onDone: () {
       log("Connection closed");

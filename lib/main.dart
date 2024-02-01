@@ -10,12 +10,13 @@ import 'package:chat_app/services/web_socket_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-final webSocketClient = WebSocketClient();
+WebSocketClient? webSocketClient;
 
 void main() {
   Bloc.observer = AppBlocObserver();
 
   DependencyInjection.setup();
+  webSocketClient = WebSocketClient();
 
   runApp(const MyApp());
 }
