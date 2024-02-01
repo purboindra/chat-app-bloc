@@ -48,7 +48,6 @@ class Message extends Equatable {
   factory Message.fromJson(Map<String, dynamic> json) {
     return Message(
       id: json['id'] ?? const Uuid().v4(),
-      // token: json["token"] ?? "",
       chatRoomId: json['chat_room_id'] ?? '',
       senderUserId: json['sender_user_id'] ?? '',
       receiverUserId: json['receiver_user_id'] ?? '',
