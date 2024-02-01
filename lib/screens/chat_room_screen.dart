@@ -1,8 +1,13 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:chat_app/data/entities/user_entity.dart';
 import 'package:chat_app/domain/bloc/message_bloc.dart';
 import 'package:chat_app/domain/event/message_event.dart';
 import 'package:chat_app/domain/state/message_state.dart';
+import 'package:chat_app/main.dart';
 import 'package:chat_app/route/route_name.dart';
+import 'package:chat_app/utils/app_print.dart';
 import 'package:chat_app/widgets/avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,31 +31,72 @@ class ChatRoomScreen extends StatefulWidget {
 
 class _ChatRoomScreenState extends State<ChatRoomScreen> {
   final _messageController = TextEditingController();
+  late StreamSubscription streamSubscription;
+  String currentUid = '';
+
+  final uri = Uri.parse('ws://localhost:8080/ws');
+
+  void sendWs(String data) {
+    webSocketClient!.send(data);
+  }
 
   @override
   void initState() {
-    // context.read<AuthenticationBloc>().add(FetchUserEvent(widget.uid));
     context.read<MessageBloc>().add(FetchMessageEvent(widget.uid));
-    // _loadMessages();
-    // _startWebSocket();
-    // messageRepository.subscribeToMessageUpdate((p0) {
-    //   log("MESSAGE UPDATE $p0");
-    //   final message = Message.fromJson(p0);
-
-    //   log("CHAT ROOM: ${message.chatRoomId} || ${widget.chatRoom.id}");
-    //   if (message.chatRoomId == widget.chatRoom.id) {
-    //     messages.add(message);
-    //     messages.sort((a, b) => a.createdAt.compareTo(b.createdAt));
-    //     setState(() {});
-    //   }
-    // });
+    _startWebSocket();
+    listenMessage();
+    // context.read<MessageBloc>().add(SubscribeMessageEvent((p1) {
+    //   AppPrint.debugPrint("MESSAGE UPDATE $p1");
+    // }));
     super.initState();
+  }
+
+  void listenMessage() {
+    AppPrint.debugPrint('LISTEN MESSAGE CALLED');
+    streamSubscription = webSocketClient!.messageUpdate().listen((event) {
+      AppPrint.debugPrint('LISTEN MESSAGE $event');
+      BlocProvider.of<MessageBloc>(context).add(FetchMessageEvent(widget.uid));
+    });
+  }
+
+  void _sendMessage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final message = Message(
+        chatRoomId: widget.uid,
+        senderUserId: prefs.getString("user_id") ?? "",
+        receiverUserId: widget.uid,
+        content: _messageController.text,
+        createdAt: DateTime.now());
+    sendWs(jsonEncode({
+      "event": "message.created",
+      "message": message.toJson(),
+      "token": prefs.getString("token") ?? "",
+    }));
+    _messageController.clear();
+  }
+
+  void onMessageReceived(Map<String, dynamic> message) {
+    // Lakukan sesuatu dengan pesan yang diterima
+    print('Pesan diterima: $message');
   }
 
   @override
   void dispose() {
     _messageController.dispose();
+    streamSubscription.cancel();
     super.dispose();
+  }
+
+  _startWebSocket() {
+    if (webSocketClient != null) {
+      AppPrint.debugPrint('WEBSOCKET NOT NULL');
+      webSocketClient!.connect(
+        'ws://localhost:8080/ws',
+        {
+          'Authorization': 'Bearer ',
+        },
+      );
+    }
   }
 
   @override
@@ -62,15 +108,16 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         // TODO: implement listener
       },
       builder: (context, state) {
-        if (state is LoadingFetchMessage) {
-          return const Scaffold(
-            body: Center(
-              child: Column(
-                children: [CircularProgressIndicator.adaptive()],
-              ),
-            ),
-          );
-        } else if (state is SuccessFetchMessage) {
+        // if (state is LoadingFetchMessage) {
+        //   return const Scaffold(
+        //     body: Center(
+        //       child: Column(
+        //         children: [CircularProgressIndicator.adaptive()],
+        //       ),
+        //     ),
+        //   );
+        // } else
+        if (state is SuccessFetchMessage) {
           return Scaffold(
             appBar: AppBar(
               leading: IconButton(
@@ -134,20 +181,46 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                                 itemCount: state.message.length,
                                 itemBuilder: (context, index) {
                                   final message = state.message[index];
-
+                                  String timestampString = message.createdAt!;
+                                  DateTime timestamp =
+                                      DateTime.parse(timestampString);
+                                  int hour = timestamp.hour;
+                                  int minute = timestamp.minute;
                                   return Align(
                                     alignment:
-                                        state.message[index].id != widget.uid
-                                            ? Alignment.topRight
-                                            : Alignment.topLeft,
-                                    child: ListTile(
-                                      leading: const SizedBox(),
-                                      trailing: const SizedBox(),
-                                      title: Text(message.message ?? ""),
-                                      subtitle: Text(
-                                          DateTime.parse(message.createdAt!)
-                                              .day
-                                              .toString()),
+                                        message.senderUserId != currentUid
+                                            ? Alignment.topLeft
+                                            : Alignment.topRight,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          message.senderUserId != currentUid
+                                              ? CrossAxisAlignment.start
+                                              : CrossAxisAlignment.end,
+                                      children: [
+                                        Container(
+                                          margin: const EdgeInsets.all(4)
+                                              .copyWith(right: 0),
+                                          padding: const EdgeInsets.all(10),
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(6),
+                                            color: message.senderUserId !=
+                                                    currentUid
+                                                ? Colors.blue
+                                                : Colors.purple,
+                                          ),
+                                          child: Text(
+                                            message.message ?? "",
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                        Text(
+                                          "$hour:$minute",
+                                          style: const TextStyle(),
+                                        ),
+                                      ],
                                     ),
                                   );
                                 }),
@@ -176,26 +249,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                                     ),
                                     suffixIcon: IconButton(
                                       onPressed: () async {
-                                        final prefs = await SharedPreferences
-                                            .getInstance();
-                                        final message = Message(
-                                            chatRoomId:
-                                                widget.participantUser.id ?? "",
-                                            senderUserId:
-                                                prefs.getString("user_id") ??
-                                                    "",
-                                            receiverUserId:
-                                                widget.participantUser.id ?? "",
-                                            content: _messageController.text,
-                                            createdAt: DateTime.now());
-                                        await Future.delayed(Duration.zero, () {
-                                          context
-                                              .read<MessageBloc>()
-                                              .add(SendMessageEvent(
-                                                message,
-                                                prefs.getString("token") ?? "",
-                                              ));
-                                        });
+                                        _sendMessage();
                                       },
                                       icon: const Icon(Icons.send),
                                     ),
