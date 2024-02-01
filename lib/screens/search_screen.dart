@@ -70,6 +70,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           onTap: () =>
                               context.push(AppRouteName.chatRoomScreen, extra: {
                             "user": user.toJson(),
+                            "userId": user.id,
                           }),
                           title: Text(user.userName ?? ""),
                           subtitle: Text(user.email ?? ""),
