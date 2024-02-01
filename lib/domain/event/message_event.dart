@@ -17,6 +17,15 @@ final class FetchAllMessagesEvent extends MessageEvent {
   List<Object> get props => [token];
 }
 
+final class SubscribeMessageEvent extends MessageEvent {
+  final void Function(Map<String, dynamic> p1) onMessageReceived;
+
+  const SubscribeMessageEvent(this.onMessageReceived);
+
+  @override
+  List<Object> get props => [onMessageReceived];
+}
+
 final class FetchMessageEvent extends MessageEvent {
   final String chatRoomId;
   const FetchMessageEvent(this.chatRoomId);
