@@ -31,6 +31,14 @@ class ApiClient {
   final String _baseUrl;
   final http.Client _httpClient;
 
+  Future<void> signOut() async {
+    final uri = Uri.parse('$_baseUrl/auth/sign-out');
+    final response = await http.get(uri);
+    if (response.statusCode != HttpStatus.ok) {
+      throw Exception('Failed to log out');
+    }
+  }
+
   Future<List<UserEntity>> searchUser(String query, String token) async {
     List<UserEntity> users = [];
     final uri = Uri.parse('$_baseUrl/search?name=$query');
@@ -69,7 +77,6 @@ class ApiClient {
     final response = await http.get(uri, headers: {
       HttpHeaders.authorizationHeader: token,
     });
-
     return jsonDecode(response.body);
   }
 
@@ -111,6 +118,7 @@ class ApiClient {
           "${response.statusCode}, error: ${decodeData["message"]}");
     }
     if (decodeData["data"] == null) return null;
+    log("SUCCESS SIGN UP ${decodeData["data"]}");
     final user = UserEntity.fromJson(decodeData["data"]);
     return user;
   }

@@ -42,3 +42,7 @@ final class SuccessFetchUser extends AuthenticationState {
   @override
   List<Object> get props => [user];
 }
+
+final class LoadingSignOutState extends AuthenticationState {}
+
+final class SuccessSignOutState extends AuthenticationState {}

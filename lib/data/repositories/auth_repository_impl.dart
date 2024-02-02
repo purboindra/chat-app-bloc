@@ -49,4 +49,11 @@ class AuthRepositoryImpl implements AuthRepository {
     if (response == null) return null;
     return response;
   }
+
+  @override
+  Future<void> signOut() async {
+    final prefs = await SharedPreferences.getInstance();
+    await apiClient.signOut();
+    await prefs.clear();
+  }
 }

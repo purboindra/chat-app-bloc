@@ -31,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = context.watch<AuthenticationBloc>().state;
     return Scaffold(
       body: BlocBuilder<MessageBloc, MessageState>(
         buildWhen: (previous, current) => previous != current,
@@ -50,6 +51,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text("No Chat"),
+                ],
+              ));
+            }
+            if (authState is LoadingSignOutState) {
+              return const Center(
+                  child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator.adaptive(),
                 ],
               ));
             }
@@ -88,7 +98,8 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton:
           Column(mainAxisAlignment: MainAxisAlignment.end, children: [
         FloatingActionButton(
-          onPressed: () {},
+          onPressed: () =>
+              context.read<AuthenticationBloc>().add(SignOutEvent()),
           heroTag: null,
           child: const Icon(Icons.logout),
         ),

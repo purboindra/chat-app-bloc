@@ -2,8 +2,11 @@ import 'package:chat_app/domain/bloc/base_bloc.dart';
 import 'package:chat_app/domain/event/auth_event.dart';
 import 'package:chat_app/domain/repositories/auth_repository.dart';
 import 'package:chat_app/domain/state/auth_state.dart';
+import 'package:chat_app/route/route_name.dart';
+import 'package:chat_app/route/router.dart';
 import 'package:chat_app/utils/app_print.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthenticationBloc
@@ -13,6 +16,22 @@ class AuthenticationBloc
     on<SignInEvent>(_handleSignIn);
     on<GetUserFromPrefsEvent>(_handleGetUserFromPrefs);
     on<FetchUserEvent>(_handleFetchUSer);
+    on<SignOutEvent>(_handleSignOut);
+  }
+
+  void _handleSignOut(
+      SignOutEvent event, Emitter<AuthenticationState> emit) async {
+    emit(LoadingSignOutState());
+    try {
+      await authRepository.signOut();
+      await Future.delayed(Duration.zero, () {
+        AppRouter.ctx!.go(AppRouteName.authenticationScreen);
+      });
+      emit(SuccessSignOutState());
+    } catch (e) {
+      AppPrint.debugPrint("ERROR SIGN OUT BLOC $e");
+      emit(InitialAuthState());
+    }
   }
 
   void _handleFetchUSer(

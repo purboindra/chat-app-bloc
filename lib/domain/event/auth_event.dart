@@ -46,3 +46,5 @@ final class FetchUserEvent extends AuthenticationEvent {
   @override
   List<Object> get props => [id];
 }
+
+final class SignOutEvent extends AuthenticationEvent {}

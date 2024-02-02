@@ -7,6 +7,22 @@ class AuthRepository {
   AuthRepository({required this.dbClient});
   final SupabaseClient dbClient;
 
+  Future<Map<String, dynamic>>? signOut() async {
+    try {
+      await dbClient.auth.signOut(scope: SignOutScope.global);
+      return {
+        "message": "Success Sign Out",
+        "status_code": HttpStatus.ok,
+      };
+    } catch (e) {
+      print('ERROR SIGN OUT AUTH REPO $e');
+      return {
+        "message": "$e",
+        "status_code": HttpStatus.internalServerError,
+      };
+    }
+  }
+
   Future<User?> getCurrentUser() async {
     try {
       final user = await dbClient.auth.currentUser;
