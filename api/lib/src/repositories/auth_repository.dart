@@ -53,7 +53,7 @@ class AuthRepository {
 
       return {
         "message": null,
-        "data": user.toJson(),
+        "data": userEntity.toJson(),
       };
     } catch (e, st) {
       print("ERROR SIGN UP $e $st");
