@@ -53,4 +53,7 @@ class AppRouter {
       ),
     ],
   );
+
+  static BuildContext? get ctx =>
+      router.routerDelegate.navigatorKey.currentContext!;
 }
