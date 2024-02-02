@@ -43,8 +43,9 @@ class AuthenticationBloc
       if (response == null) {
         throw Exception("Maaf, terjadi kesalahan...");
       }
-      await authRepository.saveIdToPrefs(response.id ?? "");
-      await authRepository.saveTokenToPrefs(response.token ?? "");
+
+      await authRepository.saveIdToPrefs(response.id);
+      await authRepository.saveTokenToPrefs(response.token);
       emit(SuccessAuthState());
     } catch (e, st) {
       AppPrint.debugPrint("ERROR FROM SIGN IN EVENT $e $st");
