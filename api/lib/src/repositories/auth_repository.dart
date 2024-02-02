@@ -49,7 +49,7 @@ class AuthRepository {
       await dbClient
           .from("users")
           .update(userEntity.toJson())
-          .eq("id", response.user!.id);
+          .eq("id", userEntity.id!);
 
       return {
         "message": null,
