@@ -19,10 +19,11 @@ class MessageRepository {
 
       if (chatRooms.isEmpty) {
         await dbClient.from("chat_rooms").insert({
-          "user_id": data["sender_user_id"],
+          "last_message_id": response.first["id"],
+          "sender_id": data["sender_user_id"],
           "id": data["receiver_user_id"],
           "token": token,
-        }).select();
+        });
       } else {
         await dbClient.from("chat_rooms").update({
           "last_message_id": response.first["id"],
