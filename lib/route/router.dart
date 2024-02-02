@@ -2,7 +2,7 @@ import 'package:chat_app/data/entities/user_entity.dart';
 import 'package:chat_app/route/route_name.dart';
 import 'package:chat_app/screens/authentication_screen.dart';
 import 'package:chat_app/screens/chat_room_screen.dart';
-import 'package:chat_app/screens/messages_screen.dart';
+import 'package:chat_app/screens/home_screen.dart';
 import 'package:chat_app/screens/search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
