@@ -49,9 +49,9 @@ class AuthenticationBloc
       GetUserFromPrefsEvent event, Emitter<AuthenticationState> emit) async {
     emit(LoadingGetUserFromPrefsState());
     final prefs = await SharedPreferences.getInstance();
-    final result = prefs.getString("user_id") ?? "";
-    AppPrint.debugPrint("current user $result");
-    emit(ResultGetUserFromPrefsState(result));
+    final userId = prefs.getString("user_id") ?? "";
+    final token = prefs.getString("token") ?? "";
+    emit(ResultGetUserFromPrefsState(token, userId));
   }
 
   void _handleSignUp(

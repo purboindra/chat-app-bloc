@@ -25,11 +25,12 @@ final class ErrorAuthState extends AuthenticationState {
 
 final class ResultGetUserFromPrefsState extends AuthenticationState {
   final String token;
+  final String userId;
 
-  const ResultGetUserFromPrefsState(this.token);
+  const ResultGetUserFromPrefsState(this.token, this.userId);
 
   @override
-  List<Object> get props => [token];
+  List<Object> get props => [token, userId];
 }
 
 final class LoadingGetUserFromPrefsState extends AuthenticationState {}
