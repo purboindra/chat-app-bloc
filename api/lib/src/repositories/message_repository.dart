@@ -67,12 +67,31 @@ class MessageRepository {
     }
   }
 
-  Future<List<Map<String, dynamic>>> fetchMessages(String chatRoomId) async {
+  Future<List<Map<String, dynamic>>> fetchMessages(
+      String chatRoomId, String senderId) async {
     try {
-      return await dbClient
-          .from("messages")
-          .select()
-          .eq("chat_room_id", chatRoomId);
+      print("CHAT ROOM ID $chatRoomId - SENDER ID $senderId");
+
+      // final response = await dbClient
+      //     .from("messages")
+      //     .select("*")
+      //     .eq("sender_user_id", senderId)
+      //     .eq("chat_room_id", chatRoomId)
+      //     .select("*");
+
+      final response = await dbClient.from("messages").select();
+      // .match({
+      //   "chat_room_id": chatRoomId,
+      //   "sender_user_id": senderId,
+      // }).match({
+      //   "chat_room_id": senderId,
+      //   "sender_user_id": chatRoomId,
+      // })
+      //     .select();
+
+      print('SASA $response');
+
+      return response;
     } catch (e) {
       throw Exception(e);
     }
