@@ -56,8 +56,7 @@ class MessageBloc extends BaseBloc<MessageEvent, MessageState> {
 
   void _handleFetchMessage(
       FetchMessageEvent event, Emitter<MessageState> emit) async {
-    // emit(LoadingFetchMessage());
-    AppPrint.debugPrint('SENDER ID BLOC ${event.senderId}');
+    emit(LoadingFetchMessage());
     try {
       final response = await messageRepository.fetchMessages(
           event.chatRoomId, event.senderId);
