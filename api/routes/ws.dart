@@ -31,7 +31,6 @@ Future<Response> onRequest(RequestContext context) async {
           ).catchError((err) {
             print('Something went wrong $err');
           });
-
           break;
         default:
       }
