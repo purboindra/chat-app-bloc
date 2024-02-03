@@ -17,7 +17,8 @@ class ApiClient {
   }) : this._(
             tokenProvider: tokenProvider,
             httpClient: httpClient,
-            baseUrl: 'http://localhost:8080');
+            baseUrl:
+                'http://${Platform.isAndroid ? "192.168.1.3" : "localhost"}:8080');
 
   ApiClient._({
     required TokenProvider tokenProvider,
@@ -43,7 +44,7 @@ class ApiClient {
     List<UserEntity> users = [];
     final uri = Uri.parse('$_baseUrl/search?name=$query');
 
-    final response = await http.get(uri, headers: {
+    final response = await _httpClient.get(uri, headers: {
       HttpHeaders.authorizationHeader: token,
     });
     final decode = jsonDecode(response.body);
@@ -59,8 +60,8 @@ class ApiClient {
 
   Future<void> createMessage(Message message, String token) async {
     final uri = Uri.parse("$_baseUrl/messages/create-message");
-    final response =
-        await http.post(uri, body: jsonEncode(message.toJson()), headers: {
+    final response = await _httpClient
+        .post(uri, body: jsonEncode(message.toJson()), headers: {
       HttpHeaders.authorizationHeader: token,
     });
 
@@ -76,7 +77,7 @@ class ApiClient {
 
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString("token") ?? "";
-    final response = await http.get(uri, headers: {
+    final response = await _httpClient.get(uri, headers: {
       HttpHeaders.authorizationHeader: token,
     });
     return jsonDecode(response.body);
@@ -86,8 +87,8 @@ class ApiClient {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString("token") ?? "";
     final uri = Uri.parse('$_baseUrl/messages');
-    final response =
-        await http.get(uri, headers: {HttpHeaders.authorizationHeader: token});
+    final response = await _httpClient
+        .get(uri, headers: {HttpHeaders.authorizationHeader: token});
     final decode = jsonDecode(response.body);
     if (decode == null) {
       return [];
@@ -100,7 +101,7 @@ class ApiClient {
 
   Future<UserEntity?> fetchUser(String id) async {
     final uri = Uri.parse("$_baseUrl/auth/user?uid=$id");
-    final response = await http.get(uri);
+    final response = await _httpClient.get(uri);
     final decodeData = jsonDecode(response.body);
     if (response.statusCode != HttpStatus.ok) {
       throw Exception(
@@ -111,7 +112,7 @@ class ApiClient {
 
   Future<UserEntity?> signUp(String email, String password) async {
     final uri = Uri.parse('$_baseUrl/auth/sign-up');
-    final response = await http.post(uri,
+    final response = await _httpClient.post(uri,
         body: jsonEncode({"email": email, "password": password}));
     final decodeData = jsonDecode(response.body);
     if (response.statusCode != HttpStatus.ok) {
@@ -119,17 +120,15 @@ class ApiClient {
           "${response.statusCode}, error: ${decodeData["message"]}");
     }
     if (decodeData["data"] == null) return null;
-    log("SUCCESS SIGN UP ${decodeData["data"]}");
     final user = UserEntity.fromJson(decodeData["data"]);
     return user;
   }
 
   Future<UserEntity?> signIn(String email, String password) async {
     final uri = Uri.parse('$_baseUrl/auth/sign-in');
-    final response = await http.post(uri,
+    final response = await _httpClient.post(uri,
         body: jsonEncode({"email": email, "password": password}));
     final decodeData = jsonDecode(response.body);
-    log("SIG IN $decodeData");
     if (response.statusCode != HttpStatus.ok) {
       throw Exception(
           "${response.statusCode}, error: ${decodeData["message"]}");
