@@ -15,9 +15,7 @@ class MessageBloc extends BaseBloc<MessageEvent, MessageState> {
 
   void _handleSubscribeMessage(
       SubscribeMessageEvent event, Emitter<MessageState> emit) async {
-    AppPrint.debugPrint('CALLLED BOS');
     try {
-      AppPrint.debugPrint("HALLLO");
       messageRepository.subscribeToMessageUpdate((p0) {
         AppPrint.debugPrint('P0 $p0');
         event.onMessageReceived(p0);
@@ -54,8 +52,10 @@ class MessageBloc extends BaseBloc<MessageEvent, MessageState> {
   void _handleFetchMessage(
       FetchMessageEvent event, Emitter<MessageState> emit) async {
     // emit(LoadingFetchMessage());
+    AppPrint.debugPrint('SENDER ID BLOC ${event.senderId}');
     try {
-      final response = await messageRepository.fetchMessages(event.chatRoomId);
+      final response = await messageRepository.fetchMessages(
+          event.chatRoomId, event.senderId);
       emit(SuccessFetchMessage(response));
     } catch (e, st) {
       AppPrint.debugPrint("ERROR FETCH MESSAGE $e $st");

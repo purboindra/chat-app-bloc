@@ -6,7 +6,7 @@ import 'package:models/models.dart';
 
 abstract class MessageRepository {
   Future<List<ChatRoomEntity>> fetchAllMessages();
-  Future<List<MessageEntity>> fetchMessages(String chatRoomId);
+  Future<List<MessageEntity>> fetchMessages(String chatRoomId, String senderId);
   Future<void> createMessage(Message message, String token);
   void subscribeToMessageUpdate(
       void Function(Map<String, dynamic>) onMEssageReceived);

@@ -20,7 +20,7 @@ class MessageRepositoryImpl implements MessageRepository {
     if (response.isEmpty) return messages;
     for (final message in response) {
       final chatRoomData = ChatRoomEntity(
-          avatarUrl: message["user"]["avatar_url"],
+          avatarUrl: message["user"]["avatar_url"] ?? "",
           createdAt: message["messages"]["created_at"],
           email: message["user"]["email"],
           id: message["user"]["id"],
@@ -34,8 +34,9 @@ class MessageRepositoryImpl implements MessageRepository {
   }
 
   @override
-  Future<List<MessageEntity>> fetchMessages(String chatRoomId) async {
-    final response = await apiClient.fetchMessages(chatRoomId);
+  Future<List<MessageEntity>> fetchMessages(
+      String chatRoomId, String senderId) async {
+    final response = await apiClient.fetchMessages(chatRoomId, senderId);
     final message = response["messages"] as List<dynamic>;
     return message.map((e) => MessageEntity.fromJson(e)).toList();
   }

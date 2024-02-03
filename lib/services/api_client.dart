@@ -69,8 +69,10 @@ class ApiClient {
     }
   }
 
-  Future<Map<String, dynamic>> fetchMessages(String chatRoomId) async {
-    final uri = Uri.parse('$_baseUrl/messages/id/$chatRoomId/message');
+  Future<Map<String, dynamic>> fetchMessages(
+      String chatRoomId, String senderId) async {
+    final uri =
+        Uri.parse('$_baseUrl/messages/id/$chatRoomId/message/$senderId');
 
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString("token") ?? "";
@@ -87,7 +89,6 @@ class ApiClient {
     final response =
         await http.get(uri, headers: {HttpHeaders.authorizationHeader: token});
     final decode = jsonDecode(response.body);
-
     if (decode == null) {
       return [];
     }
@@ -139,38 +140,38 @@ class ApiClient {
     return user;
   }
 
-  Future<Map<String, dynamic>> _handleRequest(
-    Future<http.Response> Function(Map<String, String>) request,
-  ) async {
-    try {
-      final headers = await _getRequestHeaders();
-      final response = await request(headers);
-      final body = jsonDecode(response.body);
-      if (response.statusCode != HttpStatus.ok) {
-        throw Exception("${response.statusCode}, error: ${body["message"]}");
-      }
-      if (response.request!.method == "POST") {
-        return {
-          "data": body,
-          "status_code": response.statusCode,
-        };
-      }
-      return body;
-    } on TimeoutException {
-      throw Exception("Request timeout. Please try again...");
-    } catch (e, st) {
-      throw Exception("Unexpected error: $e $st");
-    }
-  }
+  // Future<Map<String, dynamic>> _handleRequest(
+  //   Future<http.Response> Function(Map<String, String>) request,
+  // ) async {
+  //   try {
+  //     final headers = await _getRequestHeaders();
+  //     final response = await request(headers);
+  //     final body = jsonDecode(response.body);
+  //     if (response.statusCode != HttpStatus.ok) {
+  //       throw Exception("${response.statusCode}, error: ${body["message"]}");
+  //     }
+  //     if (response.request!.method == "POST") {
+  //       return {
+  //         "data": body,
+  //         "status_code": response.statusCode,
+  //       };
+  //     }
+  //     return body;
+  //   } on TimeoutException {
+  //     throw Exception("Request timeout. Please try again...");
+  //   } catch (e, st) {
+  //     throw Exception("Unexpected error: $e $st");
+  //   }
+  // }
 
-  Future<Map<String, String>> _getRequestHeaders() async {
-    final token = await _tokenProvider();
-    return <String, String>{
-      HttpHeaders.contentTypeHeader: ContentType.json.value,
-      HttpHeaders.acceptHeader: ContentType.json.value,
+  // Future<Map<String, String>> _getRequestHeaders() async {
+  //   final token = await _tokenProvider();
+  //   return <String, String>{
+  //     HttpHeaders.contentTypeHeader: ContentType.json.value,
+  //     HttpHeaders.acceptHeader: ContentType.json.value,
 
-      // if (token != null)
-      HttpHeaders.authorizationHeader: "Bearer $token"
-    };
-  }
+  //     // if (token != null)
+  //     HttpHeaders.authorizationHeader: "Bearer $token"
+  //   };
+  // }
 }

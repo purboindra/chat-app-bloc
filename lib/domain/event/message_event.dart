@@ -28,10 +28,11 @@ final class SubscribeMessageEvent extends MessageEvent {
 
 final class FetchMessageEvent extends MessageEvent {
   final String chatRoomId;
-  const FetchMessageEvent(this.chatRoomId);
+  final String senderId;
+  const FetchMessageEvent(this.chatRoomId, this.senderId);
 
   @override
-  List<Object> get props => [chatRoomId];
+  List<Object> get props => [chatRoomId, senderId];
 }
 
 final class SendMessageEvent extends MessageEvent {
