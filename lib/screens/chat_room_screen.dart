@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:chat_app/data/entities/message_entity.dart';
 import 'package:chat_app/data/entities/user_entity.dart';
+import 'package:chat_app/domain/bloc/auth_bloc.dart';
 import 'package:chat_app/domain/bloc/message_bloc.dart';
 import 'package:chat_app/domain/event/message_event.dart';
+import 'package:chat_app/domain/state/auth_state.dart';
 import 'package:chat_app/domain/state/message_state.dart';
 import 'package:chat_app/main.dart';
 import 'package:chat_app/route/route_name.dart';
@@ -42,12 +45,12 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
 
   @override
   void initState() {
-    context.read<MessageBloc>().add(FetchMessageEvent(widget.uid));
+    getData();
+    final state = BlocProvider.of<AuthenticationBloc>(context).state;
+    context.read<MessageBloc>().add(FetchMessageEvent(
+        widget.uid, state is ResultGetUserFromPrefsState ? state.userId : ""));
     _startWebSocket();
     listenMessage();
-    // context.read<MessageBloc>().add(SubscribeMessageEvent((p1) {
-    //   AppPrint.debugPrint("MESSAGE UPDATE $p1");
-    // }));
     super.initState();
   }
 
@@ -55,8 +58,22 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     AppPrint.debugPrint('LISTEN MESSAGE CALLED');
     streamSubscription = webSocketClient!.messageUpdate().listen((event) {
       AppPrint.debugPrint('LISTEN MESSAGE $event');
-      BlocProvider.of<MessageBloc>(context).add(FetchMessageEvent(widget.uid));
+      final a = BlocProvider.of<MessageBloc>(context).state;
+      if (a is SuccessFetchMessage) {
+        a.message.add(MessageEntity.fromJson(event));
+      }
+
+      // BlocProvider.of<MessageBloc>(context)
+      //     .add(FetchMessageEvent(widget.uid, currentUid));
     });
+  }
+
+  void getData() async {
+    final prefs = await SharedPreferences.getInstance();
+    currentUid = prefs.getString("user_id") ?? "No User Id";
+    AppPrint.debugPrint("CURRENT USER ID");
+
+    setState(() {});
   }
 
   void _sendMessage() async {
@@ -102,7 +119,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   @override
   Widget build(BuildContext context) {
     final viewInsets = MediaQuery.viewInsetsOf(context);
-
+    final a = BlocProvider.of<MessageBloc>(context).state;
     return BlocConsumer<MessageBloc, MessageState>(
       listener: (context, state) {
         // TODO: implement listener
@@ -122,7 +139,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
             appBar: AppBar(
               leading: IconButton(
                 onPressed: () {
-                  //  context.read<MessageBloc>().add(FetchAllMessagesEvent(state.message.firstWhere((element) => element.id==widget.uid)));
                   context.pushReplacement(AppRouteName.mainScreen);
                 },
                 icon: const Icon(
@@ -141,7 +157,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                     radius: 20,
                   ),
                   Text(
-                    "",
+                    widget.participantUser.userName ?? "",
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -158,42 +174,49 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                 ),
               ],
             ),
-            body: state.message.isEmpty
-                ? const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text("Start a new messages..."),
-                      ],
-                    ),
-                  )
-                : SafeArea(
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                          left: 16.0,
-                          right: 16.0,
-                          top: 0,
-                          bottom: (viewInsets.bottom > 0) ? 8 : 0),
-                      child: Column(
-                        children: [
-                          Expanded(
+            body: SafeArea(
+              child: Padding(
+                padding: EdgeInsets.only(
+                    left: 16.0,
+                    right: 16.0,
+                    top: 0,
+                    bottom: (viewInsets.bottom > 0) ? 8 : 0),
+                child: Column(
+                  children: [
+                    state.message.isEmpty
+                        ? const Expanded(
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text("Start a new messages..."),
+                                ],
+                              ),
+                            ),
+                          )
+                        : Expanded(
                             child: ListView.builder(
-                                itemCount: state.message.length,
+                                itemCount: a is SuccessFetchMessage
+                                    ? a.message.length
+                                    : state.message.length,
                                 itemBuilder: (context, index) {
-                                  final message = state.message[index];
+                                  final message = a is SuccessFetchMessage
+                                      ? a.message[index]
+                                      : state.message[index];
                                   String timestampString = message.createdAt!;
                                   DateTime timestamp =
                                       DateTime.parse(timestampString);
                                   int hour = timestamp.hour;
                                   int minute = timestamp.minute;
+
                                   return Align(
                                     alignment:
-                                        message.senderUserId != currentUid
+                                        message.senderUserId == widget.uid
                                             ? Alignment.topLeft
                                             : Alignment.topRight,
                                     child: Column(
                                       crossAxisAlignment:
-                                          message.senderUserId != currentUid
+                                          message.senderUserId == widget.uid
                                               ? CrossAxisAlignment.start
                                               : CrossAxisAlignment.end,
                                       children: [
@@ -204,10 +227,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                                           decoration: BoxDecoration(
                                             borderRadius:
                                                 BorderRadius.circular(6),
-                                            color: message.senderUserId !=
-                                                    currentUid
-                                                ? Colors.blue
-                                                : Colors.purple,
+                                            color: message.senderUserId ==
+                                                    widget.uid
+                                                ? Colors.purple
+                                                : Colors.blue,
                                           ),
                                           child: Text(
                                             message.message ?? "",
@@ -225,43 +248,43 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                                   );
                                 }),
                           ),
-                          Row(
-                            children: [
-                              IconButton(
-                                onPressed: () {},
-                                icon: const Icon(
-                                  Icons.attach_file,
-                                ),
-                              ),
-                              Expanded(
-                                child: TextFormField(
-                                  controller: _messageController,
-                                  decoration: InputDecoration(
-                                    filled: true,
-                                    fillColor: Theme.of(context)
-                                        .colorScheme
-                                        .primary
-                                        .withAlpha(100),
-                                    hintText: "Type a message",
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                    suffixIcon: IconButton(
-                                      onPressed: () async {
-                                        _sendMessage();
-                                      },
-                                      icon: const Icon(Icons.send),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () {},
+                          icon: const Icon(
+                            Icons.attach_file,
                           ),
-                        ],
-                      ),
+                        ),
+                        Expanded(
+                          child: TextFormField(
+                            controller: _messageController,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withAlpha(100),
+                              hintText: "Type a message",
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide.none,
+                              ),
+                              suffixIcon: IconButton(
+                                onPressed: () async {
+                                  _sendMessage();
+                                },
+                                icon: const Icon(Icons.send),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
+                  ],
+                ),
+              ),
+            ),
           );
         }
         return const Scaffold(
