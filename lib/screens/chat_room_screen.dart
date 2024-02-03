@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:chat_app/data/entities/message_entity.dart';
 import 'package:chat_app/data/entities/user_entity.dart';
@@ -37,14 +38,19 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   late StreamSubscription streamSubscription;
   String currentUid = '';
 
-  final uri = Uri.parse('ws://localhost:8080/ws');
+  String wsUrl = 'ws://${Platform.isIOS ? "localhost" : "192.168.1.3"}:8080/ws';
 
-  void sendWs(String data) {
+  Uri initUri() {
+    return Uri.parse(wsUrl);
+  }
+
+  void _sendWs(String data) {
     webSocketClient!.send(data);
   }
 
   @override
   void initState() {
+    initUri();
     getData();
     final state = BlocProvider.of<AuthenticationBloc>(context).state;
     context.read<MessageBloc>().add(FetchMessageEvent(
@@ -57,8 +63,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   void listenMessage() {
     streamSubscription = webSocketClient!.messageUpdate().listen((event) {
       onMessageReceived(event);
-
-      AppPrint.debugPrint('LISTEN MESSAGE $event');
     });
   }
 
@@ -75,7 +79,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         receiverUserId: widget.uid,
         content: _messageController.text,
         createdAt: DateTime.now());
-    sendWs(jsonEncode({
+    _sendWs(jsonEncode({
       "event": "message.created",
       "message": message.toJson(),
       "token": prefs.getString("token") ?? "",
@@ -84,10 +88,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   }
 
   void onMessageReceived(Map<String, dynamic> message) {
+    AppPrint.debugPrint('ON MESSAGE RECEIVED $message');
     List<MessageEntity> messages = [];
-    final a = BlocProvider.of<MessageBloc>(context).state;
-    if (a is SuccessFetchMessage) {
-      messages.addAll(a.message);
+    final state = BlocProvider.of<MessageBloc>(context).state;
+    if (state is SuccessFetchMessage) {
+      messages.addAll(state.message);
       messages.add(MessageEntity.fromJson(message));
       BlocProvider.of<MessageBloc>(context).add(UpdateMessagesEvent(messages));
     }
@@ -102,9 +107,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
 
   _startWebSocket() {
     if (webSocketClient != null) {
-      AppPrint.debugPrint('WEBSOCKET NOT NULL');
       webSocketClient!.connect(
-        'ws://localhost:8080/ws',
+        wsUrl,
+        // TODO TOKEN
         {
           'Authorization': 'Bearer ',
         },
