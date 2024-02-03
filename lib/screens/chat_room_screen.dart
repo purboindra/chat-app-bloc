@@ -4,10 +4,8 @@ import 'dart:io';
 
 import 'package:chat_app/data/entities/message_entity.dart';
 import 'package:chat_app/data/entities/user_entity.dart';
-import 'package:chat_app/domain/bloc/auth_bloc.dart';
 import 'package:chat_app/domain/bloc/message_bloc.dart';
 import 'package:chat_app/domain/event/message_event.dart';
-import 'package:chat_app/domain/state/auth_state.dart';
 import 'package:chat_app/domain/state/message_state.dart';
 import 'package:chat_app/main.dart';
 import 'package:chat_app/route/route_name.dart';
@@ -23,11 +21,9 @@ class ChatRoomScreen extends StatefulWidget {
   const ChatRoomScreen({
     super.key,
     required this.participantUser,
-    required this.uid,
   });
 
   final UserEntity participantUser;
-  final String uid;
 
   @override
   State<ChatRoomScreen> createState() => _ChatRoomScreenState();
@@ -40,21 +36,19 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
 
   String wsUrl = 'ws://${Platform.isIOS ? "localhost" : "192.168.1.3"}:8080/ws';
 
-  Uri initUri() {
-    return Uri.parse(wsUrl);
+  void _sendMessageCreatedWs(String data) {
+    webSocketClient!.send(data);
   }
 
-  void _sendWs(String data) {
+  void _sendMessageReceivedWs(String data) {
     webSocketClient!.send(data);
   }
 
   @override
   void initState() {
-    initUri();
     getData();
-    final state = BlocProvider.of<AuthenticationBloc>(context).state;
     context.read<MessageBloc>().add(FetchMessageEvent(
-        widget.uid, state is ResultGetUserFromPrefsState ? state.userId : ""));
+        widget.participantUser.id!, widget.participantUser.id!));
     _startWebSocket();
     listenMessage();
     super.initState();
@@ -74,16 +68,23 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   void _sendMessage() async {
     final prefs = await SharedPreferences.getInstance();
     final message = Message(
-        chatRoomId: widget.uid,
+        chatRoomId: widget.participantUser.id!,
         senderUserId: prefs.getString("user_id") ?? "",
-        receiverUserId: widget.uid,
+        receiverUserId: widget.participantUser.id!,
         content: _messageController.text,
         createdAt: DateTime.now());
-    _sendWs(jsonEncode({
+    _sendMessageCreatedWs(jsonEncode({
       "event": "message.created",
       "message": message.toJson(),
       "token": prefs.getString("token") ?? "",
     }));
+
+    _sendMessageReceivedWs(jsonEncode({
+      "event": "message.received",
+      "message": message.toJson(),
+      "token": prefs.getString("token") ?? "",
+    }));
+
     _messageController.clear();
   }
 
@@ -120,183 +121,169 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   @override
   Widget build(BuildContext context) {
     final viewInsets = MediaQuery.viewInsetsOf(context);
-    final a = BlocProvider.of<MessageBloc>(context).state;
-    return BlocConsumer<MessageBloc, MessageState>(
-      listener: (context, state) {
-        // TODO: implement listener
-        if (state is SuccessAddMessageState) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(const SnackBar(content: Text("Adddd")));
-        }
-      },
-      builder: (context, state) {
-        if (state is LoadingFetchMessage) {
-          return const Scaffold(
-            body: Center(
-              child: Column(
-                children: [CircularProgressIndicator.adaptive()],
-              ),
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            context.pushReplacement(AppRouteName.mainScreen);
+          },
+          icon: const Icon(
+            Icons.chevron_left,
+          ),
+        ),
+        centerTitle: true,
+        title: Column(
+          children: [
+            const SizedBox(
+              height: 3.0,
             ),
-          );
-        } else if (state is SuccessFetchMessage) {
-          return Scaffold(
-            appBar: AppBar(
-              leading: IconButton(
-                onPressed: () {
-                  context.pushReplacement(AppRouteName.mainScreen);
-                },
-                icon: const Icon(
-                  Icons.chevron_left,
-                ),
-              ),
-              centerTitle: true,
-              title: Column(
-                children: [
-                  const SizedBox(
-                    height: 3.0,
-                  ),
-                  const Avatar(
-                    imageUrl:
-                        "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                    radius: 20,
-                  ),
-                  Text(
-                    widget.participantUser.userName ?? "",
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-              actions: [
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.more_vert,
-                  ),
-                ),
-                const SizedBox(
-                  width: 8,
-                ),
+            const Avatar(
+              imageUrl:
+                  "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+              radius: 20,
+            ),
+            Text(
+              widget.participantUser.userName ?? "Anonymous",
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(
+              Icons.more_vert,
+            ),
+          ),
+          const SizedBox(
+            width: 8,
+          ),
+        ],
+      ),
+      body: BlocBuilder<MessageBloc, MessageState>(builder: (context, state) {
+        if (state is LoadingFetchMessage) {
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator.adaptive(),
               ],
             ),
-            body: SafeArea(
-              child: Padding(
-                padding: EdgeInsets.only(
-                    left: 16.0,
-                    right: 16.0,
-                    top: 0,
-                    bottom: (viewInsets.bottom > 0) ? 8 : 0),
-                child: Column(
-                  children: [
-                    state.message.isEmpty
-                        ? const Expanded(
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text("Start a new messages..."),
-                                ],
-                              ),
-                            ),
-                          )
-                        : Expanded(
-                            child: ListView.builder(
-                                itemCount: a is SuccessFetchMessage
-                                    ? a.message.length
-                                    : state.message.length,
-                                itemBuilder: (context, index) {
-                                  final message = a is SuccessFetchMessage
-                                      ? a.message[index]
-                                      : state.message[index];
-                                  String timestampString = message.createdAt!;
-                                  DateTime timestamp =
-                                      DateTime.parse(timestampString);
-                                  int hour = timestamp.hour;
-                                  int minute = timestamp.minute;
-
-                                  return Align(
-                                    alignment:
-                                        message.senderUserId == widget.uid
-                                            ? Alignment.topLeft
-                                            : Alignment.topRight,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          message.senderUserId == widget.uid
-                                              ? CrossAxisAlignment.start
-                                              : CrossAxisAlignment.end,
-                                      children: [
-                                        Container(
-                                          margin: const EdgeInsets.all(4)
-                                              .copyWith(right: 0),
-                                          padding: const EdgeInsets.all(10),
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(6),
-                                            color: message.senderUserId ==
-                                                    widget.uid
-                                                ? Colors.purple
-                                                : Colors.blue,
-                                          ),
-                                          child: Text(
-                                            message.message ?? "",
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ),
-                                        Text(
-                                          "$hour:$minute",
-                                          style: const TextStyle(),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }),
-                          ),
-                    Row(
-                      children: [
-                        IconButton(
-                          onPressed: () {},
-                          icon: const Icon(
-                            Icons.attach_file,
-                          ),
-                        ),
-                        Expanded(
-                          child: TextFormField(
-                            controller: _messageController,
-                            decoration: InputDecoration(
-                              filled: true,
-                              fillColor: Theme.of(context)
-                                  .colorScheme
-                                  .primary
-                                  .withAlpha(100),
-                              hintText: "Type a message",
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide.none,
-                              ),
-                              suffixIcon: IconButton(
-                                onPressed: () async {
-                                  _sendMessage();
-                                },
-                                icon: const Icon(Icons.send),
-                              ),
+          );
+        }
+        if (state is SuccessFetchMessage) {
+          return SafeArea(
+            child: Padding(
+              padding: EdgeInsets.only(
+                  left: 16.0,
+                  right: 16.0,
+                  top: 0,
+                  bottom: (viewInsets.bottom > 0) ? 8 : 0),
+              child: Column(
+                children: [
+                  state.message.isEmpty
+                      ? const Expanded(
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text("Start a new messages..."),
+                              ],
                             ),
                           ),
+                        )
+                      : Expanded(
+                          child: ListView.builder(
+                              itemCount: state.message.length,
+                              itemBuilder: (context, index) {
+                                final message = state.message[index];
+                                String timestampString = message.createdAt!;
+                                DateTime timestamp =
+                                    DateTime.parse(timestampString);
+                                int hour = timestamp.hour;
+                                int minute = timestamp.minute;
+                                return Align(
+                                  alignment: message.senderUserId ==
+                                          widget.participantUser.id
+                                      ? Alignment.topLeft
+                                      : Alignment.topRight,
+                                  child: Column(
+                                    crossAxisAlignment: message.senderUserId ==
+                                            widget.participantUser.id
+                                        ? CrossAxisAlignment.start
+                                        : CrossAxisAlignment.end,
+                                    children: [
+                                      Container(
+                                        margin: const EdgeInsets.all(4)
+                                            .copyWith(right: 0),
+                                        padding: const EdgeInsets.all(10),
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(6),
+                                          color: message.senderUserId ==
+                                                  widget.participantUser.id
+                                              ? Colors.purple
+                                              : Colors.blue,
+                                        ),
+                                        child: Text(
+                                          message.message ?? "",
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                      Text(
+                                        "$hour:$minute",
+                                        style: const TextStyle(),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
+                ],
               ),
             ),
           );
         }
-        return Scaffold(
-          body: Center(
-            child: Text("state is $state"),
+        return const SizedBox();
+      }),
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 8),
+          child: Row(
+            children: [
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(
+                  Icons.attach_file,
+                ),
+              ),
+              Expanded(
+                child: TextFormField(
+                  controller: _messageController,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor:
+                        Theme.of(context).colorScheme.primary.withAlpha(100),
+                    hintText: "Type a message",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none,
+                    ),
+                    suffixIcon: IconButton(
+                      onPressed: () async {
+                        _sendMessage();
+                      },
+                      icon: const Icon(Icons.send),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
