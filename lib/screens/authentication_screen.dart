@@ -41,7 +41,8 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
         if (state is ResultGetUserFromPrefsState) {
           if (state.token.isNotEmpty) {
             context.go(AppRouteName.mainScreen);
-            context.read<MessageBloc>().add(FetchAllMessagesEvent(state.token));
+            BlocProvider.of<MessageBloc>(context)
+                .add(FetchAllMessagesEvent(state.token));
           }
         }
       }, builder: (context, state) {
