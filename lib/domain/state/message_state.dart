@@ -42,4 +42,6 @@ final class SuccessFetchMessage extends MessageState {
   List<Object> get props => [message];
 }
 
-final class SuccessSendMessage extends MessageState {}
+final class SuccessAddMessageState extends MessageState {}
+
+final class LoadingAddMessageState extends MessageState {}

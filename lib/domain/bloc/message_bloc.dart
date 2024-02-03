@@ -11,6 +11,7 @@ class MessageBloc extends BaseBloc<MessageEvent, MessageState> {
     on<FetchMessageEvent>(_handleFetchMessage);
     on<SendMessageEvent>(_handleSendMessage);
     on<SubscribeMessageEvent>(_handleSubscribeMessage);
+    on<UpdateMessagesEvent>(_handleUpdateMessage);
   }
 
   void _handleSubscribeMessage(
@@ -25,11 +26,15 @@ class MessageBloc extends BaseBloc<MessageEvent, MessageState> {
     }
   }
 
+  void _handleUpdateMessage(
+      UpdateMessagesEvent event, Emitter<MessageState> emit) async {
+    emit(SuccessFetchMessage(event.messages));
+  }
+
   void _handleSendMessage(
       SendMessageEvent event, Emitter<MessageState> emit) async {
     try {
       await messageRepository.createMessage(event.message, event.token);
-      AppPrint.debugPrint("SUCCESS SEND MESSAGE");
       // emit(SuccessSendMessage());
     } catch (e, st) {
       AppPrint.debugPrint("ERROR SEND MESSAGE $e $st");

@@ -1,3 +1,4 @@
+import 'package:chat_app/data/entities/message_entity.dart';
 import 'package:equatable/equatable.dart';
 import 'package:models/models.dart';
 
@@ -33,6 +34,15 @@ final class FetchMessageEvent extends MessageEvent {
 
   @override
   List<Object> get props => [chatRoomId, senderId];
+}
+
+final class UpdateMessagesEvent extends MessageEvent {
+  final List<MessageEntity> messages;
+
+  const UpdateMessagesEvent(this.messages);
+
+  @override
+  List<Object> get props => [messages];
 }
 
 final class SendMessageEvent extends MessageEvent {

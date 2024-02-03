@@ -55,25 +55,16 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   }
 
   void listenMessage() {
-    AppPrint.debugPrint('LISTEN MESSAGE CALLED');
     streamSubscription = webSocketClient!.messageUpdate().listen((event) {
-      AppPrint.debugPrint('LISTEN MESSAGE $event');
-      final a = BlocProvider.of<MessageBloc>(context).state;
-      if (a is SuccessFetchMessage) {
-        a.message.add(MessageEntity.fromJson(event));
-      }
+      onMessageReceived(event);
 
-      // BlocProvider.of<MessageBloc>(context)
-      //     .add(FetchMessageEvent(widget.uid, currentUid));
+      AppPrint.debugPrint('LISTEN MESSAGE $event');
     });
   }
 
   void getData() async {
     final prefs = await SharedPreferences.getInstance();
     currentUid = prefs.getString("user_id") ?? "No User Id";
-    AppPrint.debugPrint("CURRENT USER ID");
-
-    setState(() {});
   }
 
   void _sendMessage() async {
@@ -93,8 +84,13 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   }
 
   void onMessageReceived(Map<String, dynamic> message) {
-    // Lakukan sesuatu dengan pesan yang diterima
-    print('Pesan diterima: $message');
+    List<MessageEntity> messages = [];
+    final a = BlocProvider.of<MessageBloc>(context).state;
+    if (a is SuccessFetchMessage) {
+      messages.addAll(a.message);
+      messages.add(MessageEntity.fromJson(message));
+      BlocProvider.of<MessageBloc>(context).add(UpdateMessagesEvent(messages));
+    }
   }
 
   @override
@@ -123,18 +119,21 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     return BlocConsumer<MessageBloc, MessageState>(
       listener: (context, state) {
         // TODO: implement listener
+        if (state is SuccessAddMessageState) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(const SnackBar(content: Text("Adddd")));
+        }
       },
       builder: (context, state) {
-        // if (state is LoadingFetchMessage) {
-        //   return const Scaffold(
-        //     body: Center(
-        //       child: Column(
-        //         children: [CircularProgressIndicator.adaptive()],
-        //       ),
-        //     ),
-        //   );
-        // } else
-        if (state is SuccessFetchMessage) {
+        if (state is LoadingFetchMessage) {
+          return const Scaffold(
+            body: Center(
+              child: Column(
+                children: [CircularProgressIndicator.adaptive()],
+              ),
+            ),
+          );
+        } else if (state is SuccessFetchMessage) {
           return Scaffold(
             appBar: AppBar(
               leading: IconButton(
@@ -287,9 +286,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
             ),
           );
         }
-        return const Scaffold(
+        return Scaffold(
           body: Center(
-            child: Text("data"),
+            child: Text("state is $state"),
           ),
         );
       },
