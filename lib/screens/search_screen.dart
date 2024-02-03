@@ -67,11 +67,13 @@ class _SearchScreenState extends State<SearchScreen> {
                       itemBuilder: (context, index) {
                         final user = state.users[index];
                         return ListTile(
-                          onTap: () =>
-                              context.push(AppRouteName.chatRoomScreen, extra: {
-                            "user": user.toJson(),
-                            "userId": user.id,
-                          }),
+                          onTap: () {
+                            context.push(AppRouteName.chatRoomScreen, extra: {
+                              "user": user.toJson(),
+                              "userId": user.id,
+                            });
+                            state.users.clear();
+                          },
                           title: Text(user.userName ?? ""),
                           subtitle: Text(user.email ?? ""),
                         );
