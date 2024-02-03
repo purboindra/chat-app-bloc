@@ -1,3 +1,4 @@
+import 'package:chat_app/data/entities/user_entity.dart';
 import 'package:chat_app/domain/bloc/auth_bloc.dart';
 import 'package:chat_app/domain/bloc/message_bloc.dart';
 import 'package:chat_app/domain/event/auth_event.dart';
@@ -5,7 +6,6 @@ import 'package:chat_app/domain/event/message_event.dart';
 import 'package:chat_app/domain/state/auth_state.dart';
 import 'package:chat_app/domain/state/message_state.dart';
 import 'package:chat_app/route/route_name.dart';
-import 'package:chat_app/utils/app_print.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -75,12 +75,16 @@ class _HomeScreenState extends State<HomeScreen> {
                         itemBuilder: (context, index) {
                           return InkWell(
                               onTap: () {
-                                AppPrint.debugPrint(
-                                    'LAST MESSAGE ${state.messages[index].lastMessageId}');
+                                final user = UserEntity.fromJson({
+                                  "token": state.messages[index].token,
+                                  "username": state.messages[index].username,
+                                  "id": state.messages[index].id,
+                                });
+
                                 context.pushReplacement(
                                     AppRouteName.chatRoomScreen,
                                     extra: {
-                                      "userId": state.messages[index].id,
+                                      "user": user.toJson(),
                                     });
                               },
                               child: Text("${state.messages[index].email}"));

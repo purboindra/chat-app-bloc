@@ -35,18 +35,14 @@ class AppRouter {
           final data = state.extra as Map<String, dynamic>?;
 
           UserEntity? userEntity;
-          String? id;
 
           if (data != null) {
-            if (data.containsKey("userId")) {
-              id = data["userId"];
-            }
             if (data.containsKey("user")) {
               userEntity = UserEntity.fromJson(data["user"]);
             }
           }
+
           return ChatRoomScreen(
-            uid: id ?? "",
             participantUser: userEntity ?? UserEntity(),
           );
         },
