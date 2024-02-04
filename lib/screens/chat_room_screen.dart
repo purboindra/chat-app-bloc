@@ -68,21 +68,23 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   }
 
   void _sendMessage() async {
-    final prefs = await SharedPreferences.getInstance();
-    final message = Message(
-        chatRoomId: widget.participantUser.id!,
-        senderUserId: prefs.getString("user_id") ?? "",
-        receiverUserId: widget.participantUser.id!,
-        content: _messageController.text,
-        createdAt: DateTime.now());
+    if (_messageController.text.isNotEmpty) {
+      final prefs = await SharedPreferences.getInstance();
+      final message = Message(
+          chatRoomId: widget.participantUser.id!,
+          senderUserId: prefs.getString("user_id") ?? "",
+          receiverUserId: widget.participantUser.id!,
+          content: _messageController.text,
+          createdAt: DateTime.now());
 
-    _sendMessageCreatedWs(jsonEncode({
-      "event": "message.created",
-      "message": message.toJson(),
-      "token": prefs.getString("token") ?? "",
-    }));
+      _sendMessageCreatedWs(jsonEncode({
+        "event": "message.created",
+        "message": message.toJson(),
+        "token": prefs.getString("token") ?? "",
+      }));
 
-    _messageController.clear();
+      _messageController.clear();
+    }
   }
 
   void onMessageReceived(Map<String, dynamic> message) {
@@ -277,11 +279,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                       borderSide: BorderSide.none,
                     ),
                     suffixIcon: IconButton(
-                      onPressed: _messageController.text.isEmpty
-                          ? null
-                          : () async {
-                              _sendMessage();
-                            },
+                      onPressed: () async {
+                        _sendMessage();
+                      },
                       icon: const Icon(Icons.send),
                     ),
                   ),
