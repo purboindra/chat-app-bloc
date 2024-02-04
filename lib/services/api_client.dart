@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:chat_app/data/entities/user_entity.dart';
+import 'package:chat_app/env/env.dart';
 import 'package:http/http.dart' as http;
 import 'package:models/models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,7 +19,7 @@ class ApiClient {
             tokenProvider: tokenProvider,
             httpClient: httpClient,
             baseUrl:
-                'http://${Platform.isAndroid ? "192.168.1.3" : "localhost"}:8080');
+                'http://${Platform.isAndroid ? Env.IP : "localhost"}:8080');
 
   ApiClient._({
     required TokenProvider tokenProvider,
