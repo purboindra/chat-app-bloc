@@ -7,6 +7,7 @@ import 'package:chat_app/data/entities/user_entity.dart';
 import 'package:chat_app/domain/bloc/message_bloc.dart';
 import 'package:chat_app/domain/event/message_event.dart';
 import 'package:chat_app/domain/state/message_state.dart';
+import 'package:chat_app/env/env.dart';
 import 'package:chat_app/main.dart';
 import 'package:chat_app/route/route_name.dart';
 import 'package:chat_app/utils/app_print.dart';
@@ -34,15 +35,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   late StreamSubscription streamSubscription;
   String currentUid = '';
 
-  String wsUrl = 'ws://${Platform.isIOS ? "localhost" : "192.168.1.3"}:8080/ws';
-
-  void _sendMessageCreatedWs(String data) {
-    webSocketClient!.send(data);
-  }
-
-  void _sendMessageReceivedWs(String data) {
-    webSocketClient!.send(data);
-  }
+  String wsUrl = 'ws://${Platform.isIOS ? "localhost" : Env.IP}:8080/ws';
 
   @override
   void initState() {
@@ -53,6 +46,14 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     listenMessage();
     super.initState();
   }
+
+  void _sendMessageCreatedWs(String data) {
+    webSocketClient!.send(data);
+  }
+
+  // void _sendMessageReceivedWs(String data) {
+  //   webSocketClient!.send(data);
+  // }
 
   void listenMessage() {
     streamSubscription = webSocketClient!.messageUpdate().listen((event) {
@@ -73,17 +74,18 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         receiverUserId: widget.participantUser.id!,
         content: _messageController.text,
         createdAt: DateTime.now());
+
     _sendMessageCreatedWs(jsonEncode({
       "event": "message.created",
       "message": message.toJson(),
       "token": prefs.getString("token") ?? "",
     }));
 
-    _sendMessageReceivedWs(jsonEncode({
-      "event": "message.received",
-      "message": message.toJson(),
-      "token": prefs.getString("token") ?? "",
-    }));
+    // _sendMessageReceivedWs(jsonEncode({
+    //   "event": "message.received",
+    //   "message": message.toJson(),
+    //   "token": prefs.getString("token") ?? "",
+    // }));
 
     _messageController.clear();
   }
@@ -93,6 +95,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     List<MessageEntity> messages = [];
     final state = BlocProvider.of<MessageBloc>(context).state;
     if (state is SuccessFetchMessage) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Pesan baru")));
       messages.addAll(state.message);
       messages.add(MessageEntity.fromJson(message));
       BlocProvider.of<MessageBloc>(context).add(UpdateMessagesEvent(messages));
@@ -198,7 +202,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                               itemCount: state.message.length,
                               itemBuilder: (context, index) {
                                 final message = state.message[index];
-                                String timestampString = message.createdAt!;
+                                String timestampString = message.createdAt ??
+                                    DateTime.now().toIso8601String();
                                 DateTime timestamp =
                                     DateTime.parse(timestampString);
                                 int hour = timestamp.hour;

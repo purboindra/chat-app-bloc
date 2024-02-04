@@ -14,26 +14,53 @@ Future<Response> onRequest(RequestContext context) async {
       }
 
       final messageJson = jsonDecode(message) as Map<String, dynamic>;
-      final event = messageJson["event"];
       final data = messageJson["message"];
       final token = messageJson["token"];
-      switch (event) {
-        case 'message.created':
-          messageRepository.createMessage(data, token).then(
-            (message) {
-              channel.sink.add(
-                jsonEncode({
-                  'event': 'message.created',
-                  'data': message,
-                }),
-              );
-            },
-          ).catchError((err) {
-            print('Something went wrong $err');
-          });
-          break;
-        default:
-      }
+
+      print("WS on request $messageJson");
+
+      messageRepository.createMessage(data, token).then(
+        (message) {
+          channel.sink.add(
+            jsonEncode({
+              'event': 'message.created',
+              'data': message,
+            }),
+          );
+        },
+      ).catchError((err) {
+        print('Something went wrong $err');
+      });
+
+      // switch (event) {
+      //   case 'message.created':
+      //     messageRepository.createMessage(data, token).then(
+      //       (message) {
+      //         channel.sink.add(
+      //           jsonEncode({
+      //             'event': 'message.created',
+      //             'data': message,
+      //           }),
+      //         );
+      //       },
+      //     ).catchError((err) {
+      //       print('Something went wrong $err');
+      //     });
+      //     break;
+      // case 'message.received':
+      //   print("MESSAGE RECEIVER $messageJson");
+      //   messageRepository
+      //       .updateMessage(data["receiver_user_id"])
+      //       .then((value) {
+      //     channel.sink.add(
+      //       jsonEncode({
+      //         'event': 'message.received',
+      //         'data': message,
+      //       }),
+      //     );
+      //   });
+      //   default:
+      // }
     });
   });
   return handler(context);

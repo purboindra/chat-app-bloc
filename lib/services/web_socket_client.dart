@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:chat_app/utils/app_print.dart';
 import 'package:web_socket_channel/io.dart';
 
 class WebSocketClient {
@@ -27,13 +28,25 @@ class WebSocketClient {
     channel!.stream.listen((event) {
       Map<String, dynamic> message = jsonDecode(event);
 
+      AppPrint.debugPrint("WEB SOCKET MESSAGE $message");
+
+      // final decode = jsonDecode(message["data"] is String
+      //     ? message["data"]
+      //     : jsonEncode(message["data"])) as Map<String, dynamic>;
+
       if (message['event'] == 'message.created') {
         messageController.add(message["data"]);
       }
+
+      // if (message['event'] == 'message.received') {
+      //   messageController
+      //       .add(message["data"] is String ? decode : message['data']);
+      // }
     }, onDone: () {
       log("Connection closed");
       disconnect();
     }, onError: (err) {
+      disconnect();
       log("Error channel stream $err");
     });
   }
