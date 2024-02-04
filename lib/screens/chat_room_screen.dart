@@ -51,9 +51,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     webSocketClient!.send(data);
   }
 
-  // void _sendMessageReceivedWs(String data) {
-  //   webSocketClient!.send(data);
-  // }
+  void _sendMessageReceivedWs(String data) {
+    webSocketClient!.send(data);
+    AppPrint.debugPrint("SEND MESSAGE RECEIVED CALLED $data");
+  }
 
   void listenMessage() {
     streamSubscription = webSocketClient!.messageUpdate().listen((event) {
@@ -81,12 +82,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       "token": prefs.getString("token") ?? "",
     }));
 
-    // _sendMessageReceivedWs(jsonEncode({
-    //   "event": "message.received",
-    //   "message": message.toJson(),
-    //   "token": prefs.getString("token") ?? "",
-    // }));
-
     _messageController.clear();
   }
 
@@ -101,6 +96,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       messages.add(MessageEntity.fromJson(message));
       BlocProvider.of<MessageBloc>(context).add(UpdateMessagesEvent(messages));
     }
+    _sendMessageReceivedWs(jsonEncode({
+      "event": "message.received",
+      "message": message,
+    }));
   }
 
   @override
@@ -278,9 +277,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                       borderSide: BorderSide.none,
                     ),
                     suffixIcon: IconButton(
-                      onPressed: () async {
-                        _sendMessage();
-                      },
+                      onPressed: _messageController.text.isEmpty
+                          ? null
+                          : () async {
+                              _sendMessage();
+                            },
                       icon: const Icon(Icons.send),
                     ),
                   ),
