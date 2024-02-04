@@ -4,8 +4,11 @@ import 'dart:io';
 
 import 'package:chat_app/data/entities/message_entity.dart';
 import 'package:chat_app/data/entities/user_entity.dart';
+import 'package:chat_app/domain/bloc/auth_bloc.dart';
 import 'package:chat_app/domain/bloc/message_bloc.dart';
+import 'package:chat_app/domain/event/auth_event.dart';
 import 'package:chat_app/domain/event/message_event.dart';
+import 'package:chat_app/domain/state/auth_state.dart';
 import 'package:chat_app/domain/state/message_state.dart';
 import 'package:chat_app/env/env.dart';
 import 'package:chat_app/main.dart';
@@ -16,7 +19,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:models/models.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatRoomScreen extends StatefulWidget {
   const ChatRoomScreen({
@@ -34,14 +36,23 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   final _messageController = TextEditingController();
   late StreamSubscription streamSubscription;
   String currentUid = '';
+  String token = '';
 
   String wsUrl = 'ws://${Platform.isIOS ? "localhost" : Env.IP}:8080/ws';
 
   @override
   void initState() {
-    getData();
+    BlocProvider.of<AuthenticationBloc>(context).add(GetUserFromPrefsEvent());
+    final authState = context.read<AuthenticationBloc>().state;
+
+    if (authState is ResultGetUserFromPrefsState) {
+      token = authState.token;
+      currentUid = authState.userId;
+    }
+
     context.read<MessageBloc>().add(FetchMessageEvent(
         widget.participantUser.id!, widget.participantUser.id!));
+
     _startWebSocket();
     listenMessage();
     super.initState();
@@ -53,7 +64,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
 
   void _sendMessageReceivedWs(String data) {
     webSocketClient!.send(data);
-    AppPrint.debugPrint("SEND MESSAGE RECEIVED CALLED $data");
   }
 
   void listenMessage() {
@@ -62,17 +72,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     });
   }
 
-  void getData() async {
-    final prefs = await SharedPreferences.getInstance();
-    currentUid = prefs.getString("user_id") ?? "No User Id";
-  }
-
   void _sendMessage() async {
     if (_messageController.text.isNotEmpty) {
-      final prefs = await SharedPreferences.getInstance();
       final message = Message(
           chatRoomId: widget.participantUser.id!,
-          senderUserId: prefs.getString("user_id") ?? "",
+          senderUserId: currentUid,
           receiverUserId: widget.participantUser.id!,
           content: _messageController.text,
           createdAt: DateTime.now());
@@ -80,7 +84,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       _sendMessageCreatedWs(jsonEncode({
         "event": "message.created",
         "message": message.toJson(),
-        "token": prefs.getString("token") ?? "",
+        "token": token,
       }));
 
       _messageController.clear();
@@ -92,8 +96,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     List<MessageEntity> messages = [];
     final state = BlocProvider.of<MessageBloc>(context).state;
     if (state is SuccessFetchMessage) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Pesan baru")));
       messages.addAll(state.message);
       messages.add(MessageEntity.fromJson(message));
       BlocProvider.of<MessageBloc>(context).add(UpdateMessagesEvent(messages));
@@ -101,6 +103,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     _sendMessageReceivedWs(jsonEncode({
       "event": "message.received",
       "message": message,
+      "token": token,
     }));
   }
 
